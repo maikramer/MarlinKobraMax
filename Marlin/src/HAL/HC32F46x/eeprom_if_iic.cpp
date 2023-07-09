@@ -19,45 +19,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-//
-// Prefix header for all Marlin sources
-//
+/**
+ * Platform-independent Arduino functions for I2C EEPROM.
+ * Enable USE_SHARED_EEPROM if not supplied by the framework.
+ */
 
-#include "MarlinConfigPre.h"
+#include "../../inc/MarlinConfig.h"
 
-#ifdef __MARLIN_DEPS__
-  #include "../HAL/shared/fauxpins.h"
-#else
-  #include "../HAL/HAL.h"
-#endif
+#if ENABLED(IIC_BL24CXX_EEPROM)
 
-#include "../pins/pins.h"
+#include "../../libs/BL24CXX.h"
+#include "../shared/eeprom_if.h"
 
-#ifndef __MARLIN_DEPS__
-  #include HAL_PATH(.., spi_pins.h)
-#endif
+void eeprom_init()
+{
+  BL24CXX::init();
+}
 
-#include "Conditionals_post.h"
+void eeprom_write_byte(uint8_t *pos, unsigned char value)
+{
+  const unsigned eeprom_address = (unsigned)pos;
+  return BL24CXX::writeOneByte(eeprom_address, value);
+}
 
-#ifndef __MARLIN_DEPS__
+uint8_t eeprom_read_byte(uint8_t *pos)
+{
+  const unsigned eeprom_address = (unsigned)pos;
+  return BL24CXX::readOneByte(eeprom_address);
+}
 
-  #include HAL_PATH(.., inc/Conditionals_post.h)
-
-  #include "../core/types.h"  // Ahead of sanity-checks
-
-  #include "Changes.h"
-  #include "SanityCheck.h"
-  #include HAL_PATH(.., inc/SanityCheck.h)
-
-  // Include all core headers
-  #include "../core/language.h"
-  #include "../core/utility.h"
-  #include "../core/mstring.h"
-  #include "../core/serial.h"
-  #include "../core/endianness.h"
-
-#endif
-
-#include "../core/multi_language.h"
+#endif // IIC_BL24CXX_EEPROM

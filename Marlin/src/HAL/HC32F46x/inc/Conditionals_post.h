@@ -21,43 +21,14 @@
  */
 #pragma once
 
-//
-// Prefix header for all Marlin sources
-//
-
-#include "MarlinConfigPre.h"
-
-#ifdef __MARLIN_DEPS__
-  #include "../HAL/shared/fauxpins.h"
-#else
-  #include "../HAL/HAL.h"
+// If no real or emulated EEPROM selected, fall back to SD emulation
+#if USE_FALLBACK_EEPROM
+  #define SDCARD_EEPROM_EMULATION
+#elif ANY(I2C_EEPROM, SPI_EEPROM)
+  #define USE_SHARED_EEPROM 1
 #endif
 
-#include "../pins/pins.h"
-
-#ifndef __MARLIN_DEPS__
-  #include HAL_PATH(.., spi_pins.h)
+// Some STM32F4 boards may lose steps when saving to EEPROM during print (PR #17946)
+#if defined(STM32F4xx) && ENABLED(FLASH_EEPROM_EMULATION) && PRINTCOUNTER_SAVE_INTERVAL > 0
+  #define PRINTCOUNTER_SYNC
 #endif
-
-#include "Conditionals_post.h"
-
-#ifndef __MARLIN_DEPS__
-
-  #include HAL_PATH(.., inc/Conditionals_post.h)
-
-  #include "../core/types.h"  // Ahead of sanity-checks
-
-  #include "Changes.h"
-  #include "SanityCheck.h"
-  #include HAL_PATH(.., inc/SanityCheck.h)
-
-  // Include all core headers
-  #include "../core/language.h"
-  #include "../core/utility.h"
-  #include "../core/mstring.h"
-  #include "../core/serial.h"
-  #include "../core/endianness.h"
-
-#endif
-
-#include "../core/multi_language.h"

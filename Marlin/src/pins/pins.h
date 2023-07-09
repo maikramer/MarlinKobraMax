@@ -696,7 +696,8 @@
   #include "gd32f1/pins_TRIGORILLA_V006.h"          // GD32F1                               env:trigorilla_v006
 #elif MB(KEDI_CONTROLLER_V1_2)
   #include "stm32f1/pins_KEDI_CONTROLLER_V1_2.h"    // STM32F1                              env:STM32F103RC_btt env:STM32F103RC_btt_USB env:STM32F103RC_btt_maple env:STM32F103RC_btt_USB_maple
-
+#elif MB(AC_TRI_F1_V1)
+  #include "hc32f46x/pins_AC_TRI_F1_V1.h"           // HC32F46x                             env:HC32F460xCxx_AC_TRI_F1_V1
 //
 // ARM Cortex-M4F
 //
