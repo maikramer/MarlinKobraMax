@@ -1879,6 +1879,8 @@ void MarlinSettings::postprocess() {
         #endif
 
         EEPROM_READ(TERN(CLASSIC_JERK, dummyf, planner.junction_deviation_mm));
+
+        DEBUG_ECHO_MSG("Finish EEPROM Init");
       }
 
       //

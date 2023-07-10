@@ -44,7 +44,7 @@
 
 #define X_MIN_PIN                           PA6
 #define Y_MIN_PIN                           PC5
-#define Z_MIN_PIN                           PB8
+#define Z_MIN_PIN                           PA8
 
 #define X_MAX_PIN                           -1
 #define Y_MAX_PIN                           -1
@@ -53,8 +53,6 @@
 //
 // Steppers
 //
-#define OLD_ADAPTIVE_MULTISTEPPING
-
 #define X_ENABLE_PIN                        PC3
 #define X_STEP_PIN                          PA5
 #define X_DIR_PIN                           PA4
@@ -75,6 +73,8 @@
 #define Z2_DIR_PIN                          PB0
 //#define Z2_STALL_PIN                        PB2
 
+
+
 #define E0_ENABLE_PIN                       X_ENABLE_PIN
 #define E0_STEP_PIN                         PC14
 #define E0_DIR_PIN                          PC15
@@ -83,7 +83,6 @@
 #define E1_ENABLE_PIN                       X_ENABLE_PIN
 #define E1_STEP_PIN                         PB1
 #define E1_DIR_PIN                          PB0
-//#define E1_STALL_PIN                        PB2
 
 //
 // Temperature Sensors
@@ -114,7 +113,7 @@
 #define BEEPER_PIN                          PB5
 #define FIL_RUNOUT_PIN                      PC13
 
-#define LED_PIN                             -1
+#define LED_PIN                             PA1
 #define CASE_LIGHT_PIN                      -1
 #define POWER_LOSS_PIN                      PC2
 #define POWER_MONITOR_VOLTAGE_PIN           PC2
