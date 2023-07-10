@@ -49,25 +49,25 @@ void MarlinHAL::init()
     NVIC_SetPriorityGrouping(0x3);
 
     // print clock frequencies to host serial
-//    SERIAL_LEAF_1.print("-- clocks dump -- \n");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.system);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.hclk);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk0);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk1);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk2);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk3);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk4);
-//    SERIAL_LEAF_1.print(" ; ");
-//    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.exclk);
-//    SERIAL_LEAF_1.print(" ; F_CPU=");
-//    SERIAL_LEAF_1.print(F_CPU);
-//    SERIAL_LEAF_1.print("\n");
+    SERIAL_LEAF_1.print("-- clocks dump -- \n");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.system);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.hclk);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk0);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk1);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk2);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk3);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk4);
+    SERIAL_LEAF_1.print(" ; ");
+    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.exclk);
+    SERIAL_LEAF_1.print(" ; F_CPU=");
+    SERIAL_LEAF_1.print(F_CPU);
+    SERIAL_LEAF_1.print("\n");
 
     #if HAS_MEDIA && DISABLED(ONBOARD_SDIO) && (defined(SDSS) && SDSS != -1)
       OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
