@@ -110,15 +110,18 @@
 //
 #undef LCD_SERIAL_PORT
 #define LCD_SERIAL_PORT                     4
+
 #define BEEPER_PIN                          PB5
 #define FIL_RUNOUT_PIN                      PC13
 
-#define LED_PIN                             PA1
-#define CASE_LIGHT_PIN                      -1
+#define LED_PIN                             -1
+#define CASE_LIGHT_PIN                      PB8
 #define POWER_LOSS_PIN                      PC2
 #define POWER_MONITOR_VOLTAGE_PIN           PC2
 
-#define AUTO_LEVEL_RX_PIN                   PB7
+
+#define AUTO_LEVEL_TX_PIN                   PB7
+#define AUTO_LEVEL_RX_PIN                   PB6
 
 //
 // SD Card
