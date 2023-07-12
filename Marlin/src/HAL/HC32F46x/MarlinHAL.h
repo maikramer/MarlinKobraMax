@@ -1,6 +1,13 @@
 #pragma once
 #include <stdint.h>
 
+#define ADC_RESOLUTION		12
+#define HAL_ADC_VREF        3.3
+#define HAL_ADC_RESOLUTION  ADC_RESOLUTION // 12
+#define HAL_START_ADC(pin)  HAL_adc_start(pin)
+#define HAL_READ_ADC()      HAL_adc_read()
+#define HAL_ADC_READY()     true
+
 typedef int16_t pin_t;
 
 class MarlinHAL
@@ -55,6 +62,7 @@ public:
     // The current value of the ADC register
     static uint16_t adc_value();
 
+//    static void adc_start_conversion(const uint8_t adc_pin);
     /**
      * Set the PWM duty cycle for the pin to the given value.
      * Optionally invert the duty cycle [default = false]
