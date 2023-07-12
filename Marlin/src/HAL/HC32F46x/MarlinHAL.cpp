@@ -14,6 +14,7 @@
 extern "C" char *_sbrk(int incr);
 
 uint16_t MarlinHAL::adc_result;
+uint32_t AD_DMA[3];
 
 MarlinHAL::MarlinHAL() {}
 
@@ -69,29 +70,22 @@ void MarlinHAL::init()
     SERIAL_LEAF_1.print(F_CPU);
     SERIAL_LEAF_1.print("\n");
 
-    #if HAS_MEDIA && DISABLED(ONBOARD_SDIO) && (defined(SDSS) && SDSS != -1)
+#if HAS_MEDIA && DISABLED(ONBOARD_SDIO) && (defined(SDSS) && SDSS != -1)
       OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
-    #endif
+#endif
 
-    #if PIN_EXISTS(LED)
+#if PIN_EXISTS(LED)
       OUT_WRITE(LED_PIN, LOW);
-    #endif
+#endif
 
-    #if PIN_EXISTS(AUTO_LEVEL_TX)
+#if PIN_EXISTS(AUTO_LEVEL_TX)
       OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
       delay(10);
       OUT_WRITE(AUTO_LEVEL_TX_PIN, LOW);
       delay(300);
       OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
-    #endif
+#endif
 
-    #if ENABLED(SRAM_EEPROM_EMULATION)
-      __HAL_RCC_PWR_CLK_ENABLE();
-      HAL_PWR_EnableBkUpAccess();           // Enable access to backup SRAM
-      __HAL_RCC_BKPSRAM_CLK_ENABLE();
-      LL_PWR_EnableBkUpRegulator();         // Enable backup regulator
-      while (!LL_PWR_IsActiveFlag_BRR());   // Wait until backup regulator is initialized
-    #endif
 }
 
 void MarlinHAL::init_board() {}
@@ -181,18 +175,15 @@ void MarlinHAL::adc_enable(const pin_t pin)
 extern uint16_t g_adc_value[3];
 void MarlinHAL::adc_start(const pin_t pin)
 {
-    uint8_t pin_index;
-    if       (pin == TEMP_BED_PIN) {
-        pin_index = 0;
+    if(pin == TEMP_BED_PIN) {
+        g_adc_idx = 0;
     } else if(pin == TEMP_0_PIN) {
-        pin_index = 1;
+        g_adc_idx = 1;
     } else if(pin == POWER_MONITOR_VOLTAGE_PIN) {
-        pin_index = 2;
+        g_adc_idx = 2;
     } else {
-        pin_index = 0x0;
+        g_adc_idx = 0x0;
     }
-
-    MarlinHAL::adc_result = g_adc_value[pin_index];
 }
 
 bool MarlinHAL::adc_ready()
@@ -202,8 +193,22 @@ bool MarlinHAL::adc_ready()
 
 uint16_t MarlinHAL::adc_value()
 {
-    return MarlinHAL::adc_result;
+    return g_adc_value[g_adc_idx];
 }
+
+//void MarlinHAL::adc_start_conversion(const uint8_t adc_pin) {
+//        if(adc_pin>BOARD_NR_GPIO_PINS)return;
+//        uint8_t channel = PIN_MAP[adc_pin].adc_channel;
+//        DDL_ASSERT(channel!=ADC_PIN_INVALID);
+//        adc_result = adc_read(ADC1,channel);
+//        switch(adc_pin)
+//        {
+//            case TEMP_BED_PIN: AD_DMA[0] = adc_result;break;
+//            case TEMP_0_PIN: AD_DMA[1] = adc_result;break;
+//            case POWER_MONITOR_VOLTAGE_PIN: AD_DMA[2] = adc_result;break;
+//            default:break;
+//        }
+//}
 
 void MarlinHAL::set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t a, const bool b)
 {
@@ -216,5 +221,7 @@ void MarlinHAL::set_pwm_frequency(const pin_t pin, const uint16_t f_desired)
 }
 
 void flashFirmware(const int16_t) { MarlinHAL::reboot(); }
+
+
 
 #endif // TARGET_HC32F46x

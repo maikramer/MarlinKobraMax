@@ -142,12 +142,6 @@ extern "C" void usart_rx_irq_hook(uint8_t ch, uint8_t usart);
 #undef pgm_read_ptr
 #define pgm_read_ptr(addr) (*(addr))
 
-//
-// ADC
-//
-#define HAL_ADC_VREF 3.3
-#define HAL_ADC_RESOLUTION 10
-
 #define GET_PIN_MAP_PIN(index) index
 #define GET_PIN_MAP_INDEX(pin) pin
 #define PARSED_PIN_INDEX(code, dval) parser.intval(code, dval)
