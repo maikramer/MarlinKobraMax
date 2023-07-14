@@ -74,7 +74,7 @@ inline void toggle_pins() {
       #ifdef __STM32F1__
         const auto prior_mode = _GET_MODE(i);
       #else
-        const bool prior_mode = GET_PINMODE(pin);
+        const auto prior_mode = GET_PINMODE(pin);
       #endif
       #if AVR_AT90USB1286_FAMILY // Teensy IDEs don't know about these pins so must use FASTIO
         if (pin == TEENSY_E2) {
