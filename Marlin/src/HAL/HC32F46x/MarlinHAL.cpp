@@ -51,41 +51,32 @@ void MarlinHAL::init()
 
     // print clock frequencies to host serial
     SERIAL_LEAF_1.print("-- clocks dump -- \n");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.system);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.hclk);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk0);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk1);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk2);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk3);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.pclk4);
-    SERIAL_LEAF_1.print(" ; ");
-    SERIAL_LEAF_1.print(SYSTEM_CLOCK_FREQUENCIES.exclk);
-    SERIAL_LEAF_1.print(" ; F_CPU=");
-    SERIAL_LEAF_1.print(F_CPU);
+    SERIAL_LEAF_1.printf("System: %u",SYSTEM_CLOCK_FREQUENCIES.system);
+    SERIAL_LEAF_1.printf("hclk: %u", SYSTEM_CLOCK_FREQUENCIES.hclk);
+    SERIAL_LEAF_1.printf("pclk0: %u", SYSTEM_CLOCK_FREQUENCIES.pclk0);
+    SERIAL_LEAF_1.printf("pclk1: %u", SYSTEM_CLOCK_FREQUENCIES.pclk1);
+    SERIAL_LEAF_1.printf("pclk2: %u", SYSTEM_CLOCK_FREQUENCIES.pclk2);
+    SERIAL_LEAF_1.printf("pclk3: %u", SYSTEM_CLOCK_FREQUENCIES.pclk3);
+    SERIAL_LEAF_1.printf("pclk4: %u", SYSTEM_CLOCK_FREQUENCIES.pclk4);
+    SERIAL_LEAF_1.printf("exclk: %u", SYSTEM_CLOCK_FREQUENCIES.exclk);
+    SERIAL_LEAF_1.printf("F_CPU=%u \n", F_CPU);
     SERIAL_LEAF_1.print("\n");
 
 #if HAS_MEDIA && DISABLED(ONBOARD_SDIO) && (defined(SDSS) && SDSS != -1)
-      OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
+    OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
 #endif
 
 #if PIN_EXISTS(LED)
-      OUT_WRITE(LED_PIN, LOW);
+    OUT_WRITE(LED_PIN, LOW);
 #endif
 
 #if PIN_EXISTS(AUTO_LEVEL_TX)
-      OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
-      delay(10);
-      OUT_WRITE(AUTO_LEVEL_TX_PIN, LOW);
-      delay(300);
-      OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
+    OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
+    delay(10);
+    OUT_WRITE(AUTO_LEVEL_TX_PIN, LOW);
+    delay(300);
+    OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
 #endif
-
 }
 
 void MarlinHAL::init_board() {}
@@ -127,26 +118,30 @@ uint8_t MarlinHAL::get_reset_source()
     MEM_ZERO_STRUCT(rstCause);
     RMU_GetResetCause(&rstCause);
 
-    typedef enum {
-        RST_CAU_POWER_ON    = 0x01,
-        RST_CAU_EXTERNAL    = 0x02,
-        RST_CAU_BROWN_OUT   = 0x04,
-        RST_CAU_WATCHDOG    = 0x08,
-        RST_CAU_JTAG        = 0x10,
-        RST_CAU_SOFTWARE    = 0x20,
-        RST_CAU_BACKUP      = 0x40,
+    typedef enum
+    {
+        RST_CAU_POWER_ON = 0x01,
+        RST_CAU_EXTERNAL = 0x02,
+        RST_CAU_BROWN_OUT = 0x04,
+        RST_CAU_WATCHDOG = 0x08,
+        RST_CAU_JTAG = 0x10,
+        RST_CAU_SOFTWARE = 0x20,
+        RST_CAU_BACKUP = 0x40,
     } rst_cause_t;
 
     // map reset causes to those expected by Marlin
     uint8_t cause = RST_CAU_EXTERNAL;
 
-    if(Set == rstCause.enSoftware) {
+    if (Set == rstCause.enSoftware)
+    {
         cause = RST_CAU_SOFTWARE;
-
-    } else if(Set == rstCause.enWdt) {
+    }
+    else if (Set == rstCause.enWdt)
+    {
         cause = RST_CAU_WATCHDOG;
-
-    } else if(Set == rstCause.enRstPin) {
+    }
+    else if (Set == rstCause.enRstPin)
+    {
         cause = RST_CAU_EXTERNAL;
     }
 
@@ -175,13 +170,20 @@ void MarlinHAL::adc_enable(const pin_t pin)
 extern uint16_t g_adc_value[3];
 void MarlinHAL::adc_start(const pin_t pin)
 {
-    if(pin == TEMP_BED_PIN) {
+    if (pin == TEMP_BED_PIN)
+    {
         g_adc_idx = 0;
-    } else if(pin == TEMP_0_PIN) {
+    }
+    else if (pin == TEMP_0_PIN)
+    {
         g_adc_idx = 1;
-    } else if(pin == POWER_MONITOR_VOLTAGE_PIN) {
+    }
+    else if (pin == POWER_MONITOR_VOLTAGE_PIN)
+    {
         g_adc_idx = 2;
-    } else {
+    }
+    else
+    {
         g_adc_idx = 0x0;
     }
 }
@@ -196,19 +198,19 @@ uint16_t MarlinHAL::adc_value()
     return g_adc_value[g_adc_idx];
 }
 
-//void MarlinHAL::adc_start_conversion(const uint8_t adc_pin) {
-//        if(adc_pin>BOARD_NR_GPIO_PINS)return;
-//        uint8_t channel = PIN_MAP[adc_pin].adc_channel;
-//        DDL_ASSERT(channel!=ADC_PIN_INVALID);
-//        adc_result = adc_read(ADC1,channel);
-//        switch(adc_pin)
-//        {
-//            case TEMP_BED_PIN: AD_DMA[0] = adc_result;break;
-//            case TEMP_0_PIN: AD_DMA[1] = adc_result;break;
-//            case POWER_MONITOR_VOLTAGE_PIN: AD_DMA[2] = adc_result;break;
-//            default:break;
-//        }
-//}
+// void MarlinHAL::adc_start_conversion(const uint8_t adc_pin) {
+//         if(adc_pin>BOARD_NR_GPIO_PINS)return;
+//         uint8_t channel = PIN_MAP[adc_pin].adc_channel;
+//         DDL_ASSERT(channel!=ADC_PIN_INVALID);
+//         adc_result = adc_read(ADC1,channel);
+//         switch(adc_pin)
+//         {
+//             case TEMP_BED_PIN: AD_DMA[0] = adc_result;break;
+//             case TEMP_0_PIN: AD_DMA[1] = adc_result;break;
+//             case POWER_MONITOR_VOLTAGE_PIN: AD_DMA[2] = adc_result;break;
+//             default:break;
+//         }
+// }
 
 void MarlinHAL::set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t a, const bool b)
 {
@@ -221,7 +223,5 @@ void MarlinHAL::set_pwm_frequency(const pin_t pin, const uint16_t f_desired)
 }
 
 void flashFirmware(const int16_t) { MarlinHAL::reboot(); }
-
-
 
 #endif // TARGET_HC32F46x

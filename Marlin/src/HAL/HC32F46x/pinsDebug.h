@@ -95,9 +95,9 @@ static bool IS_ANALOG(pin_t pin)
     return false;
 }
 
-static bool GET_PINMODE(const pin_t pin)
+static WiringPinMode GET_PINMODE(const pin_t pin)
 {
-    return VALID_PIN(pin) && !IS_INPUT(pin);
+    return getPinMode(pin);
 }
 
 static bool GET_ARRAY_IS_DIGITAL(const int16_t array_pin)

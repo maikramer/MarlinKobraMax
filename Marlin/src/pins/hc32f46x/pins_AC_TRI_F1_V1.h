@@ -160,8 +160,8 @@
 //
 // USARTS
 //
-#define BOARD_USART1_TX_PIN     PA9     // MOTO
-#define BOARD_USART1_RX_PIN     PA15
+//#define BOARD_USART1_TX_PIN     PA9     // MOTO
+//#define BOARD_USART1_RX_PIN     PA15
 
 #define BOARD_USART2_TX_PIN     PA2     // DEBUG
 #define BOARD_USART2_RX_PIN     PA3
@@ -179,11 +179,26 @@
  * If undefined software serial is used according to the pins below
  */
 
-#define X_HARDWARE_SERIAL  MSerial1
-#define Y_HARDWARE_SERIAL  MSerial1
-#define Z_HARDWARE_SERIAL  MSerial1
-#define E0_HARDWARE_SERIAL MSerial1
+//#define X_HARDWARE_SERIAL  MSerial1
+//#define Y_HARDWARE_SERIAL  MSerial1
+//#define Z_HARDWARE_SERIAL  MSerial1
+//#define E0_HARDWARE_SERIAL MSerial1
 //#define E1_HARDWARE_SERIAL MSerial3
 
+//
+// Software serial
+//
+  #define X_SERIAL_TX_PIN                   PA9
+  #define X_SERIAL_RX_PIN                   PA15
+
+  #define Y_SERIAL_TX_PIN                   PA9
+  #define Y_SERIAL_RX_PIN                   PA15
+
+  #define Z_SERIAL_TX_PIN                   PA9
+  #define Z_SERIAL_RX_PIN                   PA15
+
+  #define E0_SERIAL_TX_PIN                  PA9
+  #define E0_SERIAL_RX_PIN                  PA15
+
 // Reduce baud rate to improve software serial reliability
-#define TMC_BAUD_RATE                     115200
+#define TMC_BAUD_RATE                     SS_BAUDRATE
