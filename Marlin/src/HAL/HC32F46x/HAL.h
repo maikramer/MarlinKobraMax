@@ -34,6 +34,7 @@
 
 #include "fastio.h"
 #include "timers.h"
+#include "Tone.h"
 
 #include <stdint.h>
 
