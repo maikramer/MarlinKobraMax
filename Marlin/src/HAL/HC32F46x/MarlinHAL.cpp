@@ -10,7 +10,7 @@
 #include "drivers/sysclock/sysclock.h"
 #include <core_hooks.h>
 #include "hc32_ddl.h"
-
+#include "drivers/bsp_pwm.h"
 extern "C" char *_sbrk(int incr);
 
 uint16_t MarlinHAL::adc_result;
@@ -214,12 +214,20 @@ uint16_t MarlinHAL::adc_value()
 
 void MarlinHAL::set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t a, const bool b)
 {
-    // TODO stub
+    switch(pin){
+        case FAN0_PIN:
+            fan_pwm_set_ratio(0,v);
+            break;
+        case FAN2_PIN:
+            fan_pwm_set_ratio(2,v);
+            break;
+    }
+
 }
 
 void MarlinHAL::set_pwm_frequency(const pin_t pin, const uint16_t f_desired)
 {
-    // TODO stub
+
 }
 
 void flashFirmware(const int16_t) { MarlinHAL::reboot(); }
