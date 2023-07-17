@@ -3160,10 +3160,18 @@
 //
 // Touch-screen LCD for Anycubic Vyper
 //
-#define ANYCUBIC_LCD_VYPER
+//#define ANYCUBIC_LCD_VYPER
 #if ENABLED(ANYCUBIC_LCD_VYPER)
   #define LCD_SERIAL_PORT 4  // Default is 3 for Anycubic
   //#define LCD_DARK // Enable if you're using the dark skin of the default ui
+#endif
+
+//
+// Touch-screen LCD for Anycubic Kobra
+//
+#define ANYCUBIC_LCD_KOBRA
+  #if ENABLED(ANYCUBIC_LCD_KOBRA)
+  #define LCD_SERIAL_PORT 4  // Default is 3 for Anycubic
 #endif
 
 //
