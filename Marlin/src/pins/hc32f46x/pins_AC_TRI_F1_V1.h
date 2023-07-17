@@ -103,7 +103,6 @@
 #define FAN1_PIN                            PA13    // auto fan for E0
 #define FAN2_PIN                            PA14    // controller fan
 #define CONTROLLER_FAN_PIN                  FAN2_PIN
-#define FAN_SOFT_PWM
 
 //
 // Misc
