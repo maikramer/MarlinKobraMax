@@ -35,23 +35,8 @@
 #include "../../../inc/MarlinConfigPre.h"
 #include "../ui_api.h"
 
-#define DEVICE_NAME             "Dudley Do-Right"
-//#define FIRMWARE_VER            "Marlin V2.0.8.1"
-#if ENABLED(CLASSIC_JERK)
-#define FIRMWARE_VER            "WabbitWare 1.8.3CJ"
-#if ENABLED(LIN_ADVANCE)
-#define FIRMWARE_VER            "WabbitWare 1.8.3LACJ"
-#else
-#define FIRMWARE_VER            "WabbitWare 1.8.3CJ"
-#endif
-#else
-#if ENABLED(LIN_ADVANCE)
-#define FIRMWARE_VER            "WabbitWare 1.8.3LAJD"
-#else
-#define FIRMWARE_VER            "WabbitWare 1.8.3JD"
-#endif
-#endif
-
+#define DEVICE_NAME             "Anycubic Kobra Max"
+#define FIRMWARE_VER            "Kobra Max V3.0MK"
 #define BUILD_VOLUME            "400*400*450 (mm)"
 #define TECH_SUPPORT            "https://www.anycubic.com"
 
@@ -231,9 +216,7 @@
 #define TXT_OUTAGE_RECOVERY_PROGRESS 0x2210
 #define TXT_OUTAGE_RECOVERY_FILE     0x2180
 
-//PREVIEW PAGE
-#define TXT_BASE64									 0x3020
-#define TXT_VAR_IMAGE 							 0x7FFE
+
 
 #define ADDRESS_SYSTEM_AUDIO     0x0080
 
@@ -242,17 +225,17 @@
 #define ADDRESS_SYSTEM_LED_STATUS          0x4500
 #define ADDRESS_PRINT_SETTING_LED_STATUS   0x4550
 
-#define TXT_ABOUT_DEVICE_NAME    0x2750
-#define TXT_ABOUT_FW_VERSION     0x2690
-#define TXT_ABOUT_PRINT_VOLUMN   0x2770
-#define TXT_ABOUT_TECH_SUPPORT   0x2790
+#define TXT_ABOUT_DEVICE_NAME       0x2750
+#define TXT_ABOUT_FW_VERSION        0x2690
+#define TXT_ABOUT_PRINT_VOLUMN      0x2770
+#define TXT_ABOUT_TECH_SUPPORT      0x2790
 
-#define TXT_STATS_PRINTS_TOTAL	 0x2690
-#define TXT_STATS_PRINTS_FINISHED	 0x2750
-#define TXT_STATS_PRINTS_FAILED  0x2770
-#define TXT_STATS_PRINTS_TIME    0x2790
-#define TXT_STATS_PRINTS_LONGEST 0x2810
-#define TXT_STATS_PRINTS_FILAMENT 0x2830
+#define TXT_STATS_PRINTS_TOTAL	    0x2690
+#define TXT_STATS_PRINTS_FINISHED	0x2750
+#define TXT_STATS_PRINTS_FAILED     0x2770
+#define TXT_STATS_PRINTS_TIME       0x2790
+#define TXT_STATS_PRINTS_LONGEST    0x2810
+#define TXT_STATS_PRINTS_FILAMENT   0x2830
 
 
 /*********************** KEY VALUE **************************/
@@ -379,7 +362,6 @@
 
 #define COLOR_RED              0xf800
 #define COLOR_BLUE             0x0210
-#define COLOUR_WHITE           0xffff
 
 namespace ExtUI {
     enum language_t : uint8_t { ENG, CHS };
@@ -409,9 +391,9 @@ namespace Anycubic {
     static uint8_t          data_index;
     static uint32_t         page_index_last;
     static uint32_t         page_index_last_2;
-	  static uint8_t          message_index;
+	static uint8_t          message_index;
     static uint8_t          pop_up_index;
-	  static uint32_t         key_index;
+	static uint32_t         key_index;
     static uint32_t         key_value;
     static uint16_t         filenumber;
     static uint16_t         filepage;
@@ -501,9 +483,9 @@ namespace Anycubic {
       static void page207_209_handle(void);
 
       static void page211_212_handle(void);
-			static void page213_handle(void);// MEL_MOD printer stats page (213)
+      static void page213_handle(void);// MEL_MOD printer stats page (213)
       static void pop_up_manager(void);
-			static void printerStatsToTFT(void);//MEL_MOD
+	  static void printerStatsToTFT(void);//MEL_MOD
 
       void SendtoTFT(PGM_P);
       void SendtoTFTLN(PGM_P);

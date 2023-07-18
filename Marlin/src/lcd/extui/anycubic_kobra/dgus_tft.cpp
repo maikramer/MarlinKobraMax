@@ -48,8 +48,8 @@
 
 namespace Anycubic {
 
-    const uint8_t MESSAGE_uint8_tu[] = {0xB4, 0xE6, 0xB4, 0xA2, 0xBF, 0xA8, 0xD2, 0xD1, 0xB2, 0xE5,
-                                        0xC8, 0xEB, 0x00};
+    const uint8_t MESSAGE_charu[] = {0xB4, 0xE6, 0xB4, 0xA2, 0xBF, 0xA8, 0xD2, 0xD1, 0xB2, 0xE5,
+                                     0xC8, 0xEB, 0x00};
     const uint8_t MESSAGE_bachu[] = {0xB4, 0xE6, 0xB4, 0xA2, 0xBF, 0xA8, 0xD2, 0xD1, 0xB0, 0xCE,
                                      0xB3, 0xF6, 0x00};
     const uint8_t MESSAGE_wuka[] = {0xCE, 0xDE, 0xB4, 0xE6, 0xB4, 0xA2, 0xBF, 0xA8, 0x00};
@@ -72,7 +72,7 @@ namespace Anycubic {
     const uint8_t MESSAGE_cold[] = {0xB4, 0xF2, 0xD3, 0xA1, 0xCD, 0xB7, 0xCE, 0xC2, 0xB6, 0xC8,
                                     0xB9, 0xFD, 0xB5, 0xCD, 0x00};
 
-    const uint8_t *p_mesage[] = {MESSAGE_uint8_tu, MESSAGE_bachu, MESSAGE_wuka, MESSAGE_lianji,
+    const uint8_t *p_mesage[] = {MESSAGE_charu, MESSAGE_bachu, MESSAGE_wuka, MESSAGE_lianji,
                                  MESSAGE_tuoji, MESSAGE_zanting, MESSAGE_tingzhi, MESSAGE_wancheng,
                                  MESSAGE_hotend_heating, MESSAGE_hotend_over, MESSAGE_bed_heating,
                                  MESSAGE_bed_over, MESSAGE_ready, MESSAGE_cold};
@@ -151,14 +151,13 @@ namespace Anycubic {
 
     DgusTFT Dgus;
 
-    void ProbeTare(void)
-    {
-      #ifdef NOZZLE_AS_PROBE
+    void ProbeTare(void) {
+#ifdef NOZZLE_AS_PROBE
         OUT_WRITE(AUTO_LEVEL_TX_PIN, LOW);
         delay(300);
         OUT_WRITE(AUTO_LEVEL_TX_PIN, HIGH);
         delay(100);
-      #endif
+#endif
     }
 
     DgusTFT::DgusTFT() {
@@ -259,12 +258,16 @@ namespace Anycubic {
             milli_last = millis();
 
             char str_buf[10];
-            sprintf(str_buf, "%lu/%lu", (uint32_t)getActualTemp_celsius(E0),
-                    (uint32_t)getTargetTemp_celsius(E0));
+            sprintf(str_buf, "%lu/%lu", (uint32_t)
+            getActualTemp_celsius(E0),
+                    (uint32_t)
+            getTargetTemp_celsius(E0));
             SendTxtToTFT(str_buf, TXT_MAIN_HOTEND);
 
-            sprintf(str_buf, "%lu/%lu", (uint32_t)getActualTemp_celsius(BED),
-                    (uint32_t)getTargetTemp_celsius(BED));
+            sprintf(str_buf, "%lu/%lu", (uint32_t)
+            getActualTemp_celsius(BED),
+                    (uint32_t)
+            getTargetTemp_celsius(BED));
             SendTxtToTFT(str_buf, TXT_MAIN_BED);
         }
 
@@ -316,7 +319,7 @@ namespace Anycubic {
 
         } else if (page_index_now == 213) {
 
-            page213_handle();// MEL_MOD for printer stats
+            page213_handle();
 
         } else {
 
@@ -351,7 +354,7 @@ namespace Anycubic {
 
     uint8_t FSHlength(FSTR_P FSHinput) {
         PGM_P FSHinputPointer = reinterpret_cast<PGM_P>(FSHinput);
-        uint8_t stringLength  = 0;
+        uint8_t stringLength = 0;
         while (pgm_read_byte(FSHinputPointer++)) stringLength++;
         return stringLength;
     }
@@ -435,7 +438,7 @@ namespace Anycubic {
                 filenavigator.reset();
                 lcd_txtbox_page = 0;
                 if (lcd_txtbox_index) {
-                    SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                    SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                     lcd_txtbox_index = 0;
                 }
                 SendFileList(lcd_txtbox_index);
@@ -447,7 +450,7 @@ namespace Anycubic {
                 filenavigator.reset();
                 lcd_txtbox_page = 0;
                 if (lcd_txtbox_index) {
-                    SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                    SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                     lcd_txtbox_index = 0;
                 }
 
@@ -509,6 +512,10 @@ namespace Anycubic {
         }
     }
 
+    uint8_t getFilamentRunoutOriginState() {
+        return runout.get_state_original();
+    }
+
     void DgusTFT::FilamentRunout() {
 #if ACDEBUG(AC_MARLIN)
         SERIAL_ECHOLNPGM("FilamentRunout() printer_state ", printer_state);
@@ -522,7 +529,7 @@ namespace Anycubic {
 
         pop_up_index = 15;  // show filament lack.
 
-        if (READ(FIL_RUNOUT_PIN) != getFilamentRunoutState()) {
+        if (READ(FIL_RUNOUT_PIN) != getFilamentRunoutOriginState()) {
             PlayTune(BEEPER_PIN, FilamentOut, 1);
 
             if (isPrintingFromMedia()) {
@@ -770,109 +777,11 @@ namespace Anycubic {
         while (const uint8_t c = pgm_read_byte(str++)) TFTSer.print(c);
     }
 
-    void DgusTFT::SendValueToTFT(uint32_t value, uint32_t address) {
-
-        uint8_t data_buf[32] = {0};
-        uint8_t data_index = 0;
-
-        uint8_t *p_u8 = (uint8_t * )(&address) + 1;
-
-        data_buf[data_index++] = 0x5A;
-        data_buf[data_index++] = 0xA5;
-        data_buf[data_index++] = 0x05;
-        data_buf[data_index++] = 0x82;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-        p_u8 = (uint8_t * )(&value) + 1;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-
-        for (uint8_t i = 0; i < data_index; i++) {
-            TFTSer.write(data_buf[i]);
-        }
-    }
-
-    void DgusTFT::RequestValueFromTFT(uint32_t address) {
-
-        uint8_t data_buf[20] = {0};
-        uint8_t data_index = 0;
-
-        uint8_t *p_u8 = (uint8_t * )(&address) + 1;
-
-        data_buf[data_index++] = 0x5A;
-        data_buf[data_index++] = 0xA5;
-        data_buf[data_index++] = 0x04;
-        data_buf[data_index++] = 0x83;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-        data_buf[data_index++] = 0x01;
-
-        for (uint8_t i = 0; i < data_index; i++) {
-            TFTSer.write(data_buf[i]);
-        }
-    }
-
-
-    void DgusTFT::SendTxtToTFT(const char *pdata, uint32_t address) {
-
-        char data_buf[128] = {0};
-        uint8_t data_index = 0;
-        uint8_t data_len = 0;
-
-        uint8_t *p_u8 = (uint8_t * )(&address) + 1;
-        data_len = strlen(pdata);
-
-        data_buf[data_index++] = 0x5A;
-        data_buf[data_index++] = 0xA5;
-        data_buf[data_index++] = data_len + 5;
-        data_buf[data_index++] = 0x82;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-
-        strncpy(&data_buf[data_index], pdata, data_len);
-        data_index += data_len;
-
-        data_buf[data_index++] = 0xFF;
-        data_buf[data_index++] = 0xFF;
-
-        for (uint8_t i = 0; i < data_index; i++) {
-            TFTSer.write(data_buf[i]);
-        }
-    }
-
-    void DgusTFT::SendColorToTFT(uint32_t color, uint32_t address) {
-
-        uint8_t data_buf[32] = {0};
-        uint8_t data_index = 0;
-
-        uint8_t *p_u8 = (uint8_t * )(&address) + 1;
-        address += 3;
-
-        data_buf[data_index++] = 0x5A;
-        data_buf[data_index++] = 0xA5;
-        data_buf[data_index++] = 0x05;
-        data_buf[data_index++] = 0x82;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-        p_u8 = (uint8_t * )(&color) + 1;
-        data_buf[data_index++] = *p_u8;
-        p_u8--;
-        data_buf[data_index++] = *p_u8;
-
-        for (uint8_t i = 0; i < data_index; i++) {
-            TFTSer.write(data_buf[i]);
-        }
-    }
-
-    void DgusTFT::SendReadNumOfTxtToTFT(uint8_t
-    number,
+    void DgusTFT::SendValueToTFT(uint32_t
+    value,
     uint32_t address
     ) {
+
     uint8_t data_buf[32] = {0};
     uint8_t data_index = 0;
 
@@ -880,15 +789,19 @@ namespace Anycubic {
 
     data_buf[data_index++] = 0x5A;
     data_buf[data_index++] = 0xA5;
-    data_buf[data_index++] = 0x04;      //frame length
-    data_buf[data_index++] = 0x83;
+    data_buf[data_index++] = 0x05;
+    data_buf[data_index++] = 0x82;
     data_buf[data_index++] = *
     p_u8;
     p_u8--;
     data_buf[data_index++] = *
     p_u8;
-    data_buf[data_index++] =
-    number;    //how much bytes to read
+    p_u8 = (uint8_t * )(&value) + 1;
+    data_buf[data_index++] = *
+    p_u8;
+    p_u8--;
+    data_buf[data_index++] = *
+    p_u8;
 
     for (
     uint8_t i = 0;
@@ -899,102 +812,241 @@ namespace Anycubic {
 }
 }
 
-void DgusTFT::ChangePageOfTFT(uint32_t page_index) {
+void DgusTFT::RequestValueFromTFT(uint32_t
+address) {
 
-#if ACDEBUG(AC_MARLIN)
-    SERIAL_ECHOLNPGM("ChangePageOfTFT: ", page_index);
-#endif
+uint8_t data_buf[20] = {0};
+uint8_t data_index = 0;
 
-    uint8_t data_buf[20] = {0};
+uint8_t *p_u8 = (uint8_t * )(&address) + 1;
+
+data_buf[data_index++] = 0x5A;
+data_buf[data_index++] = 0xA5;
+data_buf[data_index++] = 0x04;
+data_buf[data_index++] = 0x83;
+data_buf[data_index++] = *
+p_u8;
+p_u8--;
+data_buf[data_index++] = *
+p_u8;
+data_buf[data_index++] = 0x01;
+
+for (
+uint8_t i = 0;
+i<data_index;
+i++) {
+TFTSer.
+write(data_buf[i]);
+}
+}
+
+
+void DgusTFT::SendTxtToTFT(const char *pdata, uint32_t address) {
+
+    char data_buf[128] = {0};
     uint8_t data_index = 0;
-    uint32_t data_temp = 0;
+    uint8_t data_len = 0;
 
-    if (lcd_info.language == ExtUI::CHS) {
-        data_temp = page_index;
-
-    } else if (lcd_info.language == ExtUI::ENG) {
-        if (PAGE_OUTAGE_RECOVERY == page_index) {
-            data_temp = PAGE_ENG_OUTAGE_RECOVERY;
-        } else if (PAGE_CHS_PROBE_PREHEATING == page_index) {
-            data_temp = PAGE_ENG_PROBE_PREHEATING;
-        } else if (PAGE_CHS_HOMING <= page_index && page_index <= PAGE_ENG_HOMING) {
-            data_temp = page_index + 12;
-        } else if (PAGE_CHS_PROBE_PRECHECK <= page_index &&
-                   page_index <= PAGE_CHS_PROBE_PRECHECK_FAILED) {
-            data_temp = page_index + 3;
-        } else if (PAGE_CHS_TOOL_CASELIGHT == page_index) {
-            data_temp = page_index + 2;
-        } else if (PAGE_CHS_PRINTING_SETTING == page_index) {
-            data_temp = page_index + 1;
-        } else {
-            data_temp = page_index + 120;
-        }
-    }
-
-    uint8_t *p_u8 = (uint8_t * )(&data_temp) + 1;
+    uint8_t *p_u8 = (uint8_t * )(&address) + 1;
+    data_len = strlen(pdata);
 
     data_buf[data_index++] = 0x5A;
     data_buf[data_index++] = 0xA5;
-    data_buf[data_index++] = 0x07;
+    data_buf[data_index++] = data_len + 5;
     data_buf[data_index++] = 0x82;
-    data_buf[data_index++] = 0x00;
-    data_buf[data_index++] = 0x84;
-    data_buf[data_index++] = 0x5A;
-    data_buf[data_index++] = 0x01;
     data_buf[data_index++] = *p_u8;
     p_u8--;
     data_buf[data_index++] = *p_u8;
 
+    strncpy(&data_buf[data_index], pdata, data_len);
+    data_index += data_len;
+
+    data_buf[data_index++] = 0xFF;
+    data_buf[data_index++] = 0xFF;
+
     for (uint8_t i = 0; i < data_index; i++) {
         TFTSer.write(data_buf[i]);
     }
+}
 
-    page_index_last_2 = page_index_last;
-    page_index_last = page_index_now;
-    page_index_now = data_temp;
+void DgusTFT::SendColorToTFT(uint32_t
+color,
+uint32_t address
+) {
+
+uint8_t data_buf[32] = {0};
+uint8_t data_index = 0;
+
+uint8_t *p_u8 = (uint8_t * )(&address) + 1;
+address += 3;
+
+data_buf[data_index++] = 0x5A;
+data_buf[data_index++] = 0xA5;
+data_buf[data_index++] = 0x05;
+data_buf[data_index++] = 0x82;
+data_buf[data_index++] = *
+p_u8;
+p_u8--;
+data_buf[data_index++] = *
+p_u8;
+p_u8 = (uint8_t * )(&color) + 1;
+data_buf[data_index++] = *
+p_u8;
+p_u8--;
+data_buf[data_index++] = *
+p_u8;
+
+for (
+uint8_t i = 0;
+i<data_index;
+i++) {
+TFTSer.
+write(data_buf[i]);
+}
+}
+
+void DgusTFT::SendReadNumOfTxtToTFT(uint8_t
+number,
+uint32_t address
+) {
+uint8_t data_buf[32] = {0};
+uint8_t data_index = 0;
+
+uint8_t *p_u8 = (uint8_t * )(&address) + 1;
+
+data_buf[data_index++] = 0x5A;
+data_buf[data_index++] = 0xA5;
+data_buf[data_index++] = 0x04;      //frame length
+data_buf[data_index++] = 0x83;
+data_buf[data_index++] = *
+p_u8;
+p_u8--;
+data_buf[data_index++] = *
+p_u8;
+data_buf[data_index++] =
+number;    //how much bytes to read
+
+for (
+uint8_t i = 0;
+i<data_index;
+i++) {
+TFTSer.
+write(data_buf[i]);
+}
+}
+
+void DgusTFT::ChangePageOfTFT(uint32_t
+page_index) {
 
 #if ACDEBUG(AC_MARLIN)
-    SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
-    SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
-    SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
+SERIAL_ECHOLNPGM("ChangePageOfTFT: ", page_index);
+#endif
+
+uint8_t data_buf[20] = {0};
+uint8_t data_index = 0;
+uint32_t data_temp = 0;
+
+if (lcd_info.language == ExtUI::CHS) {
+data_temp = page_index;
+
+} else if (lcd_info.language == ExtUI::ENG) {
+if (PAGE_OUTAGE_RECOVERY == page_index) {
+data_temp = PAGE_ENG_OUTAGE_RECOVERY;
+} else if (PAGE_CHS_PROBE_PREHEATING == page_index) {
+data_temp = PAGE_ENG_PROBE_PREHEATING;
+} else if (PAGE_CHS_HOMING <=
+page_index &&page_index
+<= PAGE_ENG_HOMING) {
+data_temp = page_index + 12;
+} else if (PAGE_CHS_PROBE_PRECHECK <=
+page_index &&
+        page_index
+<= PAGE_CHS_PROBE_PRECHECK_FAILED) {
+data_temp = page_index + 3;
+} else if (PAGE_CHS_TOOL_CASELIGHT == page_index) {
+data_temp = page_index + 2;
+} else if (PAGE_CHS_PRINTING_SETTING == page_index) {
+data_temp = page_index + 1;
+} else {
+data_temp = page_index + 120;
+}
+}
+
+uint8_t *p_u8 = (uint8_t * )(&data_temp) + 1;
+
+data_buf[data_index++] = 0x5A;
+data_buf[data_index++] = 0xA5;
+data_buf[data_index++] = 0x07;
+data_buf[data_index++] = 0x82;
+data_buf[data_index++] = 0x00;
+data_buf[data_index++] = 0x84;
+data_buf[data_index++] = 0x5A;
+data_buf[data_index++] = 0x01;
+data_buf[data_index++] = *
+p_u8;
+p_u8--;
+data_buf[data_index++] = *
+p_u8;
+
+for (
+uint8_t i = 0;
+i<data_index;
+i++) {
+TFTSer.
+write(data_buf[i]);
+}
+
+page_index_last_2 = page_index_last;
+page_index_last = page_index_now;
+page_index_now = data_temp;
+
+#if ACDEBUG(AC_MARLIN)
+SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
+SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
+SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
 #endif
 }
 
-void DgusTFT::FakeChangePageOfTFT(uint32_t page_index) {
+void DgusTFT::FakeChangePageOfTFT(uint32_t
+page_index) {
 
 #if ACDEBUG(AC_MARLIN)
-    SERIAL_ECHOLNPGM("ChangePageOfTFT: ", page_index);
+SERIAL_ECHOLNPGM("ChangePageOfTFT: ", page_index);
 #endif
 
-    //    uint8_t data_buf[20] = {0};
-    //    uint8_t data_index = 0;
-    uint32_t data_temp = 0;
+//    uint8_t data_buf[20] = {0};
+//    uint8_t data_index = 0;
+uint32_t data_temp = 0;
 
-    if (lcd_info.language == ExtUI::CHS) {
-        data_temp = page_index;
-    } else if (lcd_info.language == ExtUI::ENG) {
-        if (PAGE_OUTAGE_RECOVERY == page_index) {
-            data_temp = PAGE_ENG_OUTAGE_RECOVERY;
-        } else if (PAGE_CHS_PROBE_PREHEATING == page_index) {
-            data_temp = PAGE_ENG_PROBE_PREHEATING;
-        } else if (PAGE_CHS_HOMING <= page_index && page_index <= PAGE_ENG_HOMING) {
-            data_temp = page_index + 12;
-        } else if (PAGE_CHS_PROBE_PRECHECK <= page_index &&
-                   page_index <= PAGE_CHS_PROBE_PRECHECK_FAILED) {
-            data_temp = page_index + 3;
-        } else {
-            data_temp = page_index + 120;
-        }
-    }
+if (lcd_info.language == ExtUI::CHS) {
+data_temp = page_index;
+} else if (lcd_info.language == ExtUI::ENG) {
+if (PAGE_OUTAGE_RECOVERY == page_index) {
+data_temp = PAGE_ENG_OUTAGE_RECOVERY;
+} else if (PAGE_CHS_PROBE_PREHEATING == page_index) {
+data_temp = PAGE_ENG_PROBE_PREHEATING;
+} else if (PAGE_CHS_HOMING <=
+page_index &&page_index
+<= PAGE_ENG_HOMING) {
+data_temp = page_index + 12;
+} else if (PAGE_CHS_PROBE_PRECHECK <=
+page_index &&
+        page_index
+<= PAGE_CHS_PROBE_PRECHECK_FAILED) {
+data_temp = page_index + 3;
+} else {
+data_temp = page_index + 120;
+}
+}
 
-    page_index_last_2 = page_index_last;
-    page_index_last = page_index_now;
-    page_index_now = data_temp;
+page_index_last_2 = page_index_last;
+page_index_last = page_index_now;
+page_index_now = data_temp;
 
 #if ACDEBUG(AC_MARLIN)
-    SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
-    SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
-    SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
+SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
+SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
+SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
 #endif
 
 }
@@ -1154,10 +1206,10 @@ void DgusTFT::SendFileList(int8_t startindex) {
 
 void DgusTFT::SelectFile() {
     strncpy(selectedfile, panel_command + 4, command_len - 4);
-    selectedfile[command_len - 4] = '\0';// MEL_FOLDER (was 5)
-//#if ACDEBUG(AC_FILE)
-    SERIAL_ECHOLN(" Selected File: ", selectedfile);
-    // #endif
+    selectedfile[command_len - 5] = '\0';
+#if ACDEBUG(AC_FILE)
+    SERIAL_ECHOLN(" Selected File: ",selectedfile);
+#endif
     switch (selectedfile[0]) {
         case '/':   // Valid file selected
             //SendtoTFTLN(AC_msg_sd_file_open_success);
@@ -1183,7 +1235,6 @@ void DgusTFT::InjectCommandandWait(PGM_P cmd) {
 
 void DgusTFT::ProcessPanelRequest() {
     uint8_t * p_u8;
-    //    uint8_t i,j;
     unsigned int control_index = 0;
     unsigned int control_value;
     unsigned int temp;
@@ -1214,7 +1265,8 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                temp = constrain((uint16_t) control_value, 0, HEATER_0_MAXTEMP);
+                temp = constrain((uint16_t)
+                control_value, 0, HEATER_0_MAXTEMP);
                 setTargetTemp_celsius(temp, E0);
             } else if (control_index == TXT_BED_TARGET ||
                        control_index == TXT_ADJUST_BED) //bed target temp
@@ -1224,7 +1276,8 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                temp = constrain((uint16_t) control_value, 0, BED_MAXTEMP);
+                temp = constrain((uint16_t)
+                control_value, 0, BED_MAXTEMP);
                 setTargetTemp_celsius(temp, BED);
             } else if (control_index == TXT_FAN_SPEED_TARGET) //fan speed
             {
@@ -1233,9 +1286,12 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                temp = constrain((uint16_t) control_value, 0, 100);
-                SendValueToTFT((uint16_t) temp, TXT_FAN_SPEED_NOW);
-                SendValueToTFT((uint16_t) temp, TXT_FAN_SPEED_TARGET);
+                temp = constrain((uint16_t)
+                control_value, 0, 100);
+                SendValueToTFT((uint16_t)
+                temp, TXT_FAN_SPEED_NOW);
+                SendValueToTFT((uint16_t)
+                temp, TXT_FAN_SPEED_TARGET);
                 setTargetFan_percent(temp, FAN0);
             } else if (control_index == TXT_PRINT_SPEED_TARGET ||
                        control_index == TXT_ADJUST_SPEED) //prinf speed
@@ -1245,12 +1301,16 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                float feedrate = constrain((uint16_t) control_value, 40, 999);
+                float feedrate = constrain((uint16_t)
+                control_value, 40, 999);
                 //         feedrate_percentage=constrain(control_value,40,999);
-                sprintf(str_buf, "%u", (uint16_t) feedrate);
+                sprintf(str_buf, "%u", (uint16_t)
+                feedrate);
                 SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
-                SendValueToTFT((uint16_t) feedrate, TXT_PRINT_SPEED_NOW);
-                SendValueToTFT((uint16_t) feedrate, TXT_PRINT_SPEED_TARGET);
+                SendValueToTFT((uint16_t)
+                feedrate, TXT_PRINT_SPEED_NOW);
+                SendValueToTFT((uint16_t)
+                feedrate, TXT_PRINT_SPEED_TARGET);
                 setFeedrate_percent(feedrate);
             } else if (control_index == TXT_PREHEAT_HOTEND_INPUT) {
                 p_u8 = (uint8_t * )(&control_value);//get  value
@@ -1258,7 +1318,8 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                temp = constrain((uint16_t) control_value, 0, HEATER_0_MAXTEMP);
+                temp = constrain((uint16_t)
+                control_value, 0, HEATER_0_MAXTEMP);
                 setTargetTemp_celsius(temp, E0);
             } else if (control_index == TXT_PREHEAT_BED_INPUT) {
                 p_u8 = (uint8_t * )(&control_value);//get  value
@@ -1266,7 +1327,8 @@ void DgusTFT::ProcessPanelRequest() {
                 p_u8++;
                 *p_u8 = data_buf[4];
 
-                temp = constrain((uint16_t) control_value, 0, BED_MAXTEMP);
+                temp = constrain((uint16_t)
+                control_value, 0, BED_MAXTEMP);
                 setTargetTemp_celsius(temp, BED);
             } else if (control_index == REG_LCD_READY) {
                 p_u8 = (uint8_t * )(&control_value);//get  value
@@ -1303,23 +1365,6 @@ void DgusTFT::ProcessPanelRequest() {
                     PlayTune(BEEPER_PIN, Anycubic_PowerOn, 1);         // take 3500 ms
                 }
             }
-
-            /* else if((control_index&0xF000)==0x2000)// is TXT ADDRESS
-               {
-                 tft_txt_index = control_index;
-                 j=0;
-                 for(i=4; ;i++)
-                 {
-                   tft_txt_buf[j] = data_buf[i];
-              if(tft_txt_buf[j]==0xFF)
-              {
-               tft_txt_buf[j]= 0 ;
-               break;
-              }
-              j++;
-                 }
-               }
-            */
         } else if (data_buf[0] == 0x82) {
             // send_cmd_to_pc(cmd ,start );
         }
@@ -1359,7 +1404,7 @@ void DgusTFT::page1_handle(void) {
             lcd_txtbox_page = 0;
 
             if (lcd_txtbox_index) {
-                SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                 lcd_txtbox_index = 0;
             }
             ChangePageOfTFT(PAGE_FILE);
@@ -1406,10 +1451,6 @@ void DgusTFT::page1_handle(void) {
     if (millis() < (flash_time + 1500)) {
         return;
     }
-    if(printer_state != AC_printer_idle && pause_state != AC_paused_filament_lack && isPrinting())
-    {
-        ChangePageOfTFT(PAGE_STATUS2);// MEL_MOD auto change to PRINT page if printing via USB
-    }
     flash_time = millis();
 }
 
@@ -1424,7 +1465,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
         case 1: // return
         {
             ChangePageOfTFT(PAGE_MAIN);
-            SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+            SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
         }
             break;
 
@@ -1433,7 +1474,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
             if (lcd_txtbox_page > 0) {
                 lcd_txtbox_page--;
 
-                SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                 lcd_txtbox_index = 0;
 
                 SendFileList(lcd_txtbox_page * 5);
@@ -1446,7 +1487,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
             if ((lcd_txtbox_page + 1) * 5 < filenavigator.getFileNum()) {
                 lcd_txtbox_page++;
 
-                SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                 lcd_txtbox_index = 0;
 
                 SendFileList(lcd_txtbox_page * 5);
@@ -1465,7 +1506,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
 
             lcd_txtbox_page = 0;
             if (lcd_txtbox_index) {
-                SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
                 lcd_txtbox_index = 0;
             }
 
@@ -1481,7 +1522,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
 
                 if (filenavigator.filelist.seek(lcd_txtbox_page * 5 + (lcd_txtbox_index - 1))) {
 
-                    SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                    SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
 
 #if ENABLED(CASE_LIGHT_ENABLE)
                     setCaseLightState(1);
@@ -1514,7 +1555,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
                     SERIAL_ECHOLNPGM("start print: ", filenavigator.filelist.longFilename());
 #endif
 
-                    SendColorToTFT(COLOUR_WHITE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+                    SendColorToTFT(COLOR_BLUE, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
 
                     // Allows printer to restart the job if we dont want to recover
                     if (printer_state == AC_printer_resuming_from_power_outage) {
@@ -1533,16 +1574,19 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
                     str_buf[17] = '\0';
                     SendTxtToTFT(str_buf, TXT_PRINT_NAME);
 
-                    sprintf(str_buf, "%d", (uint16_t) getFeedrate_percent());
+                    sprintf(str_buf, "%d", (uint16_t)
+                    getFeedrate_percent());
                     SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
 
-                    sprintf(str_buf, "%d", (uint16_t) getProgress_percent());
+                    sprintf(str_buf, "%d", (uint16_t)
+                    getProgress_percent());
                     SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
 
                     uint32_t time = 0;
                     sprintf(str_buf, "%s H ", utostr3(time / 60));
                     sprintf(str_buf + strlen(str_buf), "%s M", utostr3(time % 60));
                     SendTxtToTFT(str_buf, TXT_PRINT_TIME);
+
                     ChangePageOfTFT(PAGE_STATUS2);
                 }
             }
@@ -1579,7 +1623,7 @@ void DgusTFT::page2_handle(void) {// FILE LISTING and SELECTION
                 SendColorToTFT(COLOR_RED, TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
 
                 if (lcd_txtbox_index_last && lcd_txtbox_index_last != lcd_txtbox_index) {  // 1~5
-                    SendColorToTFT(COLOUR_WHITE,
+                    SendColorToTFT(COLOR_BLUE,
                                    TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index_last - 1));
                 }
                 lcd_txtbox_index_last = lcd_txtbox_index;
@@ -1616,7 +1660,7 @@ void DgusTFT::page3_handle(void) {
 #endif
             if (pause_state == AC_paused_idle || pause_state == AC_paused_filament_lack ||
                 printer_state == AC_printer_resuming_from_power_outage) {
-                if (READ(FIL_RUNOUT_PIN) == getFilamentRunoutState()) {
+                if (READ(FIL_RUNOUT_PIN) == getFilamentRunoutOriginState()) {
                     printer_state = AC_printer_idle;
                     pause_state = AC_paused_idle;
                     resumePrint();
@@ -1629,7 +1673,6 @@ void DgusTFT::page3_handle(void) {
             } else {
                 setUserConfirmed();
             }
-
             break;
 
         case 3: // print stop
@@ -1647,9 +1690,12 @@ void DgusTFT::page3_handle(void) {
             ChangePageOfTFT(PAGE_ADJUST);
 #endif
 
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(E0), TXT_ADJUST_HOTEND);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(BED), TXT_ADJUST_BED);
-            feedrate_last = (uint16_t) getFeedrate_percent();
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(E0), TXT_ADJUST_HOTEND);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(BED), TXT_ADJUST_BED);
+            feedrate_last = (uint16_t)
+            getFeedrate_percent();
             SendValueToTFT(feedrate_last, TXT_ADJUST_SPEED);
             flash_time = millis();
             break;
@@ -1661,7 +1707,8 @@ void DgusTFT::page3_handle(void) {
     flash_time = millis();
 
     if (feedrate_last != (uint16_t) getFeedrate_percent()) {
-        feedrate_last = (uint16_t) getFeedrate_percent();
+        feedrate_last = (uint16_t)
+        getFeedrate_percent();
         sprintf(str_buf, "%d", feedrate_last);
         SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
     }
@@ -1699,7 +1746,7 @@ void DgusTFT::page4_handle(void) {
         }
             break;
 
-        case 2:  // print pause (or continue) MEL_MOD
+        case 2:  // print pause
             if (isPrintingFromMedia()) {
                 pausePrint();
                 printer_state = AC_printer_pausing;
@@ -1723,11 +1770,15 @@ void DgusTFT::page4_handle(void) {
             ChangePageOfTFT(PAGE_ADJUST);
 #endif
 
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(E0), TXT_ADJUST_HOTEND);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(BED), TXT_ADJUST_BED);
-            feedrate_last = (uint16_t) getFeedrate_percent();
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(E0), TXT_ADJUST_HOTEND);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(BED), TXT_ADJUST_BED);
+            feedrate_last = (uint16_t)
+            getFeedrate_percent();
             SendValueToTFT(feedrate_last, TXT_ADJUST_SPEED);
-            SendValueToTFT((uint16_t) getActualFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
             SendTxtToTFT(ftostr52sprj(getZOffset_mm()), TXT_LEVEL_OFFSET);
 
             break;
@@ -1739,22 +1790,16 @@ void DgusTFT::page4_handle(void) {
     flash_time = millis();
 
     if (feedrate_last != (uint16_t) getFeedrate_percent()) {
-        feedrate_last = (uint16_t) getFeedrate_percent();
+        feedrate_last = (uint16_t)
+        getFeedrate_percent();
         sprintf(str_buf, "%d", feedrate_last);
         SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
     }
 
-    if (isPrintingFromMedia()) {
-        if (progress_last != getProgress_percent()) {
-            sprintf(str_buf, "%d", getProgress_percent());
-            SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
-            progress_last = getProgress_percent();
-        }
-    } else { // we are printing from a HOST
-        sprintf(str_buf, "Z:%3.2f", getAxisPosition_mm(Z));// MELS MOD
-        SendTxtToTFT(str_buf, TXT_PRINT_NAME);// this will show the Z height
-        //sprintf(str_buf, "%d", getProgress_percent());
-        //SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
+    if (progress_last != getProgress_percent()) {
+        sprintf(str_buf, "%d", getProgress_percent());
+        SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
+        progress_last = getProgress_percent();
     }
 
     uint32_t time = getProgress_seconds_elapsed() / 60;
@@ -1782,8 +1827,7 @@ void DgusTFT::page5_handle(void)          // print settings
             }
             break;
 
-        case 2: // - MEL MOD for 0.01mm
-        {
+        case 2: {
             z_off = getZOffset_mm();
 
             if (z_off <= -5) {
@@ -1803,8 +1847,7 @@ void DgusTFT::page5_handle(void)          // print settings
         }
             break;
 
-        case 3: // + MEL MOD 0.01mm
-        {
+        case 3: {
             z_off = getZOffset_mm();
 
             if (z_off >= 5) {
@@ -1877,8 +1920,6 @@ void DgusTFT::page6_handle(void) {
 
 void DgusTFT::page7_handle(void) // tools
 {
-    //     char str_buf[20];
-    //     unsigned int temp;
     switch (key_value) {
 
         case 0:
@@ -1897,19 +1938,27 @@ void DgusTFT::page7_handle(void) // tools
 
         case 3:   // set temperature
             ChangePageOfTFT(PAGE_TEMP);
-            SendValueToTFT((uint16_t) getActualTemp_celsius(E0), TXT_HOTNED_NOW);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(E0), TXT_HOTEND_TARGET);
-            SendValueToTFT((uint16_t) getActualTemp_celsius(BED), TXT_BED_NOW);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(BED), TXT_BED_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualTemp_celsius(E0), TXT_HOTNED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(E0), TXT_HOTEND_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualTemp_celsius(BED), TXT_BED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(BED), TXT_BED_TARGET);
 
             break;
 
         case 4:
             ChangePageOfTFT(PAGE_SPEED);
-            SendValueToTFT((uint16_t) getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
-            SendValueToTFT((uint16_t) getTargetFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
-            SendValueToTFT((uint16_t) getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
-            SendValueToTFT((uint16_t) getFeedrate_percent(), TXT_PRINT_SPEED_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
+            SendValueToTFT((uint16_t)
+            getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
+            SendValueToTFT((uint16_t)
+            getFeedrate_percent(), TXT_PRINT_SPEED_TARGET);
             break;
 
         case 5:   // turn off the xyz motor
@@ -2038,18 +2087,6 @@ void DgusTFT::page8_handle(void) {
             move_dis = 10.0f;
             SendValueToTFT(3, ADDRESS_MOVE_DISTANCE);
             break;
-
-//        case 14:
-//            movespeed = 3000;//SERIAL_PROTOCOLLN("3000");
-//            break;
-//
-//        case 15:
-//            movespeed = 2000;//SERIAL_PROTOCOLLN("2000");
-//            break;
-//
-//        case 16:
-//            movespeed = 1000;//SERIAL_PROTOCOLLN("1000");
-//            break;
     }
 }
 
@@ -2072,9 +2109,7 @@ void DgusTFT::page9_handle(void) {
 
         }
             break;
-        case 2: {
-
-        }
+        case 2:
             break;
         case 3:
 
@@ -2117,8 +2152,10 @@ void DgusTFT::page9_handle(void) {
     }
     flash_time = millis();
 
-    SendValueToTFT((uint16_t) getActualTemp_celsius(E0), TXT_HOTNED_NOW);
-    SendValueToTFT((uint16_t) getActualTemp_celsius(BED), TXT_BED_NOW);
+    SendValueToTFT((uint16_t)
+    getActualTemp_celsius(E0), TXT_HOTNED_NOW);
+    SendValueToTFT((uint16_t)
+    getActualTemp_celsius(BED), TXT_BED_NOW);
 }
 
 void DgusTFT::page10_handle(void) {
@@ -2140,9 +2177,7 @@ void DgusTFT::page10_handle(void) {
         }
             break;
 
-        case 2: {
-
-        }
+        case 2:
             break;
 
         case 3:
@@ -2173,8 +2208,10 @@ void DgusTFT::page10_handle(void) {
     }
     flash_time = millis();
 
-    SendValueToTFT((uint16_t) getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
-    SendValueToTFT((uint16_t) getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
+    SendValueToTFT((uint16_t)
+    getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
+    SendValueToTFT((uint16_t)
+    getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
 }
 
 void DgusTFT::page11_handle(void) {// SYSTEM PAGE BUTTONS
@@ -2228,7 +2265,7 @@ void DgusTFT::page11_handle(void) {// SYSTEM PAGE BUTTONS
         }
             break;
 
-        case 5:   // about (gets here from the main page)
+        case 5:   // about
 
             SendTxtToTFT(DEVICE_NAME, TXT_ABOUT_DEVICE_NAME);
             SendTxtToTFT(FIRMWARE_VER, TXT_ABOUT_FW_VERSION);
@@ -2293,14 +2330,9 @@ void DgusTFT::page14_handle(void) {
     switch (key_value) {
         case 0:
             break;
-        case 1://return
-        {
-
-        }
+        case 1:
             break;
-        case 2: {
-
-        }
+        case 2:
             break;
 
         case 3:
@@ -2337,18 +2369,24 @@ void DgusTFT::page15_handle(void) {
 
         case 3:
             ChangePageOfTFT(PAGE_PREHEAT);
-            sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(E0),
-                    (uint16_t) getTargetTemp_celsius(E0));
+            sprintf(str_buf, "%u/%u", (uint16_t)
+            getActualTemp_celsius(E0),
+                    (uint16_t)
+            getTargetTemp_celsius(E0));
             SendTxtToTFT(str_buf, TXT_PREHEAT_HOTEND);
-            sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(BED),
-                    (uint16_t) getTargetTemp_celsius(BED));
+            sprintf(str_buf, "%u/%u", (uint16_t)
+            getActualTemp_celsius(BED),
+                    (uint16_t)
+            getTargetTemp_celsius(BED));
             SendTxtToTFT(str_buf, TXT_PREHEAT_BED);
             break;
 
         case 4: {
             str_buf[0] = 0;
-            sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(E0),
-                    (uint16_t) getTargetTemp_celsius(E0));
+            sprintf(str_buf, "%u/%u", (uint16_t)
+            getActualTemp_celsius(E0),
+                    (uint16_t)
+            getTargetTemp_celsius(E0));
             SendTxtToTFT(str_buf, TXT_FILAMENT_TEMP);
             ChangePageOfTFT(PAGE_FILAMENT);
         }
@@ -2381,7 +2419,7 @@ void DgusTFT::page16_handle(void)//AUTO LEVELING
         case 3:
             char str_buf[10];
             str_buf[0] = 0;
-            strcat(str_buf, ftostr52sprj(getZOffset_mm()));
+            strcat(str_buf, ftostr52sprj(getZOffset_mm()) + 3);
             SendTxtToTFT(str_buf, TXT_LEVEL_OFFSET);
             ChangePageOfTFT(PAGE_LEVEL_ADVANCE);
             break;
@@ -2426,7 +2464,7 @@ void DgusTFT::page17_handle(void) {
             z_change = true;
             break;
 
-        case 3: // + MEL MOD 0.01mm
+        case 3:
             z_off = getZOffset_mm();
 
             if (z_off >= 5) {
@@ -2479,7 +2517,7 @@ void DgusTFT::page18_handle(void) //preheat
             ChangePageOfTFT(PAGE_PREHEAT);
             break;
 
-        case 3: // PETG
+        case 3: // ABS
             setTargetTemp_celsius(PREHEAT_2_TEMP_HOTEND, E0);// MEL_MOD
             setTargetTemp_celsius(PREHEAT_2_TEMP_BED, BED);// MEL_MOD
             ChangePageOfTFT(PAGE_PREHEAT);
@@ -2491,11 +2529,15 @@ void DgusTFT::page18_handle(void) //preheat
     }
     flash_time = millis();
 
-    sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(E0),
-            (uint16_t) getTargetTemp_celsius(E0));
+    sprintf(str_buf, "%u/%u", (uint16_t)
+    getActualTemp_celsius(E0),
+            (uint16_t)
+    getTargetTemp_celsius(E0));
     SendTxtToTFT(str_buf, TXT_PREHEAT_HOTEND);
-    sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(BED),
-            (uint16_t) getTargetTemp_celsius(BED));
+    sprintf(str_buf, "%u/%u", (uint16_t)
+    getActualTemp_celsius(BED),
+            (uint16_t)
+    getTargetTemp_celsius(BED));
     SendTxtToTFT(str_buf, TXT_PREHEAT_BED);
 }
 
@@ -2530,9 +2572,7 @@ void DgusTFT::page19_handle(void)   // Filament
                 if (getTargetTemp_celsius(E0) < 230) {
                     setTargetTemp_celsius(230, E0);
                 }
-                injectCommands_P(
-                        MEL_cmnd_auto_load_Filament);// MELS mod to quickly load/purge filament
-                //filament_cmd = FILA_IN;// no longer needed.
+                filament_cmd = FILA_IN;
             }
             break;
 
@@ -2545,11 +2585,9 @@ void DgusTFT::page19_handle(void)   // Filament
                     setTargetTemp_celsius(230, E0);
                 }
                 if (filament_cmd == FILA_NO_ACT) {
-                    //injectCommands_P(AC_cmnd_manual_unload_filament_first_in);
-                    injectCommands_P(
-                            MEL_cmnd_auto_unload_filament);// MELS mod to quickly remove filament
+                    injectCommands_P(AC_cmnd_manual_unload_filament_first_in);
                 }
-                //filament_cmd = FILA_OUT;// don't need this any more
+                filament_cmd = FILA_OUT;
             }
             break;
 
@@ -2565,8 +2603,10 @@ void DgusTFT::page19_handle(void)   // Filament
     }
     flash_time = millis();
 
-    sprintf(str_buf, "%u/%u", (uint16_t) getActualTemp_celsius(E0),
-            (uint16_t) getTargetTemp_celsius(E0));
+    sprintf(str_buf, "%u/%u", (uint16_t)
+    getActualTemp_celsius(E0),
+            (uint16_t)
+    getTargetTemp_celsius(E0));
     SendTxtToTFT(str_buf, TXT_FILAMENT_TEMP);
 
     if (!isPrinting()) {
@@ -2765,7 +2805,7 @@ void DgusTFT::page27_handle(void) {
             }
 
             setFeedrate_percent(100);           // resume print speed to 100
-            //clearProgress_seconds_elapsed();    // clear print time elapsed
+            clearProgress_seconds_elapsed();    // clear print time elapsed
         }
             break;
 
@@ -2917,7 +2957,6 @@ void DgusTFT::page33_handle(void) {
 }
 
 void DgusTFT::page34_handle(void) {
-    //          char str_buf[20];
     static millis_t flash_time = 0;
 
     if (millis() < (flash_time + 1500))return;
@@ -2943,9 +2982,6 @@ void DgusTFT::page115_handle(void) {
 
         case 2: {
             injectCommands_P(PSTR("M1024 S3"));      // -1
-            //  uint8_t value[20]
-            //sprintf_P(value,PSTR("G1 Z%iF%i")); enqueue_and_echo_command_now(value); }
-
         }
             break;
 
@@ -3128,10 +3164,12 @@ void DgusTFT::page171_handle(void)  // CHS power outage resume handler
             filename[17] = '\0';
             SendTxtToTFT(filename, TXT_OUTAGE_RECOVERY_FILE);
 
-            sprintf(str_buf, "%u", (uint16_t) getFeedrate_percent());
+            sprintf(str_buf, "%u", (uint16_t)
+            getFeedrate_percent());
             SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
 
-            sprintf(str_buf, "%u", (uint16_t) getProgress_percent());
+            sprintf(str_buf, "%u", (uint16_t)
+            getProgress_percent());
             SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
 
             ChangePageOfTFT(PAGE_STATUS2);               // show pause
@@ -3174,10 +3212,12 @@ void DgusTFT::page173_handle(void)  // ENG power outage resume handler
             filename[17] = '\0';
             SendTxtToTFT(filename, TXT_OUTAGE_RECOVERY_FILE);
 
-            sprintf(str_buf, "%u", (uint16_t) getFeedrate_percent());
+            sprintf(str_buf, "%u", (uint16_t)
+            getFeedrate_percent());
             SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
 
-            sprintf(str_buf, "%u", (uint16_t) getProgress_percent());
+            sprintf(str_buf, "%u", (uint16_t)
+            getProgress_percent());
             SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
 
             ChangePageOfTFT(PAGE_STATUS2);      // show pause
@@ -3208,7 +3248,6 @@ void DgusTFT::page173_handle(void)  // ENG power outage resume handler
 void DgusTFT::page175_handle(void)     // CHS probe preheating handler
 {
     static millis_t flash_time = 0;
-    //        char str_buf[16];
 
     if (millis() < (flash_time + 1500)) {
         return;
@@ -3219,7 +3258,6 @@ void DgusTFT::page175_handle(void)     // CHS probe preheating handler
 void DgusTFT::page176_handle(void)     // ENG probe preheating handler
 {
     static millis_t flash_time = 0;
-    //        char str_buf[16];
 
     if (millis() < (flash_time + 1500)) {
         return;
@@ -3339,11 +3377,10 @@ void DgusTFT::page201_handle(void)  // probe precheck
 
         delay(100);
 
-        if (PROBE_TRIGGERED())
-        { // triggered too early
-                probe_check_counter = 0;
-                probe_tare_flag = 0;
-                ChangePageOfTFT(PAGE_CHS_PROBE_PRECHECK_FAILED);
+        if (PROBE_TRIGGERED()) { // triggered too early
+            probe_check_counter = 0;
+            probe_tare_flag = 0;
+            ChangePageOfTFT(PAGE_CHS_PROBE_PRECHECK_FAILED);
         }
         probe_tare_flag = 1;
     }
@@ -3364,12 +3401,11 @@ void DgusTFT::page201_handle(void)  // probe precheck
 
         probe_check_time = millis();
 
-        if (!probe_state_last && PROBE_TRIGGERED())
-        {
+        if (!probe_state_last && PROBE_TRIGGERED()) {
 
-                probe_check_counter = 0;
-                probe_tare_flag = 0;
-                ChangePageOfTFT(PAGE_CHS_PROBE_PRECHECK_OK);
+            probe_check_counter = 0;
+            probe_tare_flag = 0;
+            ChangePageOfTFT(PAGE_CHS_PROBE_PRECHECK_OK);
         }
 
         probe_state_last = PROBE_TRIGGERED();
@@ -3441,19 +3477,27 @@ void DgusTFT::page207_209_handle(void) {
 
         case 3:   // set temperature
             ChangePageOfTFT(PAGE_TEMP);
-            SendValueToTFT((uint16_t) getActualTemp_celsius(E0), TXT_HOTNED_NOW);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(E0), TXT_HOTEND_TARGET);
-            SendValueToTFT((uint16_t) getActualTemp_celsius(BED), TXT_BED_NOW);
-            SendValueToTFT((uint16_t) getTargetTemp_celsius(BED), TXT_BED_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualTemp_celsius(E0), TXT_HOTNED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(E0), TXT_HOTEND_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualTemp_celsius(BED), TXT_BED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetTemp_celsius(BED), TXT_BED_TARGET);
 
             break;
 
         case 4:
             ChangePageOfTFT(PAGE_SPEED);
-            SendValueToTFT((uint16_t) getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
-            SendValueToTFT((uint16_t) getTargetFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
-            SendValueToTFT((uint16_t) getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
-            SendValueToTFT((uint16_t) getFeedrate_percent(), TXT_PRINT_SPEED_TARGET);
+            SendValueToTFT((uint16_t)
+            getActualFan_percent(FAN0), TXT_FAN_SPEED_NOW);
+            SendValueToTFT((uint16_t)
+            getTargetFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
+            SendValueToTFT((uint16_t)
+            getFeedrate_percent(), TXT_PRINT_SPEED_NOW);
+            SendValueToTFT((uint16_t)
+            getFeedrate_percent(), TXT_PRINT_SPEED_TARGET);
             break;
 
         case 5:   // turn off the xyz motor

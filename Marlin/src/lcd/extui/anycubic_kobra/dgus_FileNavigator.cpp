@@ -117,8 +117,8 @@ namespace Anycubic {
   void FileNavigator::sendFile() {
     // send the file and folder info to the panel
     // this info will be returned when the file is selected
-    // Permitted special uint8_tacters in file name -_*#~
-    // Panel can display 22 uint8_tacters per line
+    // Permitted special characters in file name -_*#~
+    // Panel can display 22 characters per line
     if (filelist.isDir()) {
       //TFTSer.print(currentfoldername);
 //      TFTSer.println(filelist.shortFilename());

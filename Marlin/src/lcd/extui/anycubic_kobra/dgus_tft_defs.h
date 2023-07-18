@@ -52,7 +52,7 @@
 #define TFTSer LCD_SERIAL                    // Serial interface for TFT panel now uses marlinserial
 #define MAX_FOLDER_DEPTH                4    // Limit folder depth TFT has a limit for the file path
 #define MAX_CMND_LEN                   16 * MAX_FOLDER_DEPTH // Maximum Length for a Panel command
-#define MAX_PATH_LEN                   16 * MAX_FOLDER_DEPTH // Maximum number of uint8_tacters in a SD file path
+#define MAX_PATH_LEN                   16 * MAX_FOLDER_DEPTH // Maximum number of characters in a SD file path
 
 #define AC_HEATER_FAULT_VALIDATION_TIME 5    // number of 1/2 second loops before signalling a heater fault
 #define AC_LOWEST_MESHPOINT_VAL        Z_PROBE_LOW_POINT // The lowest value you can set for a single mesh point offset
@@ -115,8 +115,6 @@
 #define AC_cmnd_manual_unload_filament_first_in PSTR("M83\nG1 E10 F300\nM82")
 #define AC_cmnd_enable_levelling       PSTR("M420 S1 V1")
 #define AC_cmnd_power_loss_recovery    PSTR("G28 R5 X Y\nG28 Z")       // Lift, home X and Y then home Z when in 'safe' position
-#define MEL_cmnd_auto_unload_filament  PSTR("G90\nG1 Z20 F500\nG92 E0\nG1 F200 E20\nG4 P1000\nG92 E0\nG1 F2400 E-660\nM400\nG92 E0\nM104 S0\nM84")//
-#define MEL_cmnd_auto_load_Filament    PSTR("G28\nG1 Z20 F560\nG92 E0\nG1 F2600 E560\nG92 E0\nG1 F200 E80\nM400\nM104 S0\nM84")// faster load and purge
 
 namespace Anycubic {
   enum heater_state_t : uint8_t {
