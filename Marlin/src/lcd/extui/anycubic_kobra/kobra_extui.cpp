@@ -44,29 +44,41 @@ namespace ExtUI {
   void onIdle() { Dgus.IdleLoop(); }
 
   void onPrinterKilled(FSTR_P const error, FSTR_P const component) {
-    Dgus.PrinterKilled(error,component);
+    Dgus.PrinterKilled(error, component);
   }
 
   void onMediaInserted() { Dgus.MediaEvent(AC_media_inserted); }
-  void onMediaError()    { Dgus.MediaEvent(AC_media_error);    }
-  void onMediaRemoved()  { Dgus.MediaEvent(AC_media_removed);  }
+
+  void onMediaError() { Dgus.MediaEvent(AC_media_error); }
+
+  void onMediaRemoved() { Dgus.MediaEvent(AC_media_removed); }
 
   void onPlayTone(const uint16_t frequency, const uint16_t duration) {
-    #if ENABLED(SPEAKER)
-      //::tone(BEEPER_PIN, frequency, duration);
-    #endif
+#if ENABLED(SPEAKER)
+    //::tone(BEEPER_PIN, frequency, duration);
+#endif
   }
 
   void onPrintTimerStarted() { Dgus.TimerEvent(AC_timer_started); }
-  void onPrintTimerPaused()  { Dgus.TimerEvent(AC_timer_paused);  }
-  void onPrintTimerStopped()                         { Dgus.TimerEvent(AC_timer_stopped); }
-  void onFilamentRunout(const extruder_t)            { Dgus.FilamentRunout();             }
-  void onUserConfirmRequired(const char * const msg) { Dgus.ConfirmationRequest(msg);     }
-  void onStatusChanged(const char * const msg)       { Dgus.StatusChange(msg);            }
-  void onHomingStart()    { Dgus.HomingStart(); }
+
+  void onPrintTimerPaused() { Dgus.TimerEvent(AC_timer_paused); }
+
+  void onPrintTimerStopped() { Dgus.TimerEvent(AC_timer_stopped); }
+
+  void onFilamentRunout(const extruder_t) { Dgus.FilamentRunout(); }
+
+  void onUserConfirmRequired(const char *const msg) { Dgus.ConfirmationRequest(msg); }
+
+  void onStatusChanged(const char *const msg) { Dgus.StatusChange(msg); }
+
+  void onHomingStart() { Dgus.HomingStart(); }
+
   void onHomingDone() {}
+
   void onPrintDone() {}
+
   void onHomingComplete() { Dgus.HomingComplete(); }
+
   void onPrintFinished() {}
 
   void onFactoryReset() {
@@ -107,55 +119,67 @@ namespace ExtUI {
   }
 
   void onSettingsStored(const bool success) {
-      // Called after the entire EEPROM has been written,
-      // whether successful or not.
+    // Called after the entire EEPROM has been written,
+    // whether successful or not.
   }
 
   void onSettingsLoaded(const bool success) {
-      // Called after the entire EEPROM has been read,
-      // whether successful or not.
+    // Called after the entire EEPROM has been read,
+    // whether successful or not.
   }
 
   void onPostprocessSettings() {
-      // Called after loading or resetting stored settings
+    // Called after loading or resetting stored settings
   }
 
 #if HAS_LEVELING
-    void onLevelingStart() {}
-    void onLevelingDone() {}
+
+  void onLevelingStart() {}
+
+  void onLevelingDone() {}
+
 #endif
 
-  #if HAS_MESH
-    void onMeshLevelingStart() {}
+#if HAS_MESH
 
-    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval) {
-      // Called when any mesh points are updated
-      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
-    }
+  void onMeshLevelingStart() {}
 
-    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const ExtUI::probe_state_t state) {
-      // Called to indicate a special condition
-      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
-    }
-  #endif
+  void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval) {
+    // Called when any mesh points are updated
+    //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
+  }
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    void onSetPowerLoss(const bool onoff) {
-        // Called when power-loss is enabled/disabled
-    }
-    // Called on resume from power-loss
-    void onPowerLoss() { Dgus.PowerLoss(); }
-    void onPowerLossResume() { Dgus.PowerLossRecovery(); }
-  #endif
+  void onMeshUpdate(const int8_t xpos, const int8_t ypos, const ExtUI::probe_state_t state) {
+    // Called to indicate a special condition
+    //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
+  }
 
-  #if HAS_PID_HEATING
-    void onPidTuning(const result_t rst) {
-      // Called for temperature PID tuning result
-    }
-  #endif
+#endif
+
+#if ENABLED(POWER_LOSS_RECOVERY)
+
+  void onSetPowerLoss(const bool onoff) {
+    // Called when power-loss is enabled/disabled
+  }
+
+  // Called on resume from power-loss
+  void onPowerLoss() { Dgus.PowerLoss(); }
+
+  void onPowerLossResume() { Dgus.PowerLossRecovery(); }
+
+#endif
+
+#if HAS_PID_HEATING
+
+  void onPidTuning(const result_t rst) {
+    // Called for temperature PID tuning result
+  }
+
+#endif
 
   void onSteppersDisabled() {}
-  void onSteppersEnabled()  {}
+
+  void onSteppersEnabled() {}
 }
 
 #endif // ANYCUBIC_LCD_KOBRA
