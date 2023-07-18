@@ -65,6 +65,8 @@ namespace ExtUI {
 
   void onPrintTimerStopped() { Dgus.TimerEvent(AC_timer_stopped); }
 
+  void onPrintDone() {}
+
   void onFilamentRunout(const extruder_t) { Dgus.FilamentRunout(); }
 
   void onUserConfirmRequired(const char *const msg) { Dgus.ConfirmationRequest(msg); }
@@ -73,13 +75,7 @@ namespace ExtUI {
 
   void onHomingStart() { Dgus.HomingStart(); }
 
-  void onHomingDone() {}
-
-  void onPrintDone() {}
-
-  void onHomingComplete() { Dgus.HomingComplete(); }
-
-  void onPrintFinished() {}
+  void onHomingDone() {Dgus.HomingComplete();}
 
   void onFactoryReset() {
     Dgus.page_index_now = 121;
@@ -108,10 +104,10 @@ namespace ExtUI {
     memcpy(&Dgus.lcd_info_back, buff, sizeof(Dgus.lcd_info_back));
   }
 
-  void onConfigurationStoreWritten(bool success) {
-    // Called after the entire EEPROM has been written,
-    // whether successful or not.
-  }
+//  void onConfigurationStoreWritten(bool success) {
+//    // Called after the entire EEPROM has been written,
+//    // whether successful or not.
+//  }
 
   void onConfigurationStoreRead(bool success) {
     // Called after the entire EEPROM has been read,
@@ -141,8 +137,6 @@ namespace ExtUI {
 #endif
 
 #if HAS_MESH
-
-  void onMeshLevelingStart() {}
 
   void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval) {
     // Called when any mesh points are updated

@@ -42,6 +42,7 @@
 #include "../../../libs/numtostr.h"
 #include "../../../MarlinCore.h"
 #include "../../../feature/powerloss.h"
+#include "../../../feature/runout.h"
 #include "../../../module/printcounter.h"
 #include "../../../module/stepper.h"
 #include "../../../module/probe.h"
@@ -512,32 +513,27 @@ namespace Anycubic {
     }
   }
 
-  uint8_t getFilamentRunoutOriginState() {
-    return runout.get_state_original();
-  }
 
-  void DgusTFT::FilamentRunout() {
+  void DgusTFT::FilamentRunout()  {
 #if ACDEBUG(AC_MARLIN)
     SERIAL_ECHOLNPGM("FilamentRunout() printer_state ", printer_state);
 
     // 1 Signal filament out
-    //    SendtoTFTLN(isPrintingFromMedia() ? AC_msg_filament_out_alert : AC_msg_filament_out_block);
-    //    printer_state = AC_printer_filament_out;
+//    SendtoTFTLN(isPrintingFromMedia() ? AC_msg_filament_out_alert : AC_msg_filament_out_block);
+//    printer_state = AC_printer_filament_out;
 
-    SERIAL_ECHOLNPGM("getFilamentRunoutState: ", getFilamentRunoutState());
+      SERIAL_ECHOLNPGM("getFilamentRunoutState: ", getFilamentRunoutState());
 #endif
 
     pop_up_index = 15;  // show filament lack.
 
-    if (READ(FIL_RUNOUT_PIN) != getFilamentRunoutOriginState()) {
+    if(READ(FIL_RUNOUT_PIN)) {
       PlayTune(BEEPER_PIN, FilamentOut, 1);
 
-      if (isPrintingFromMedia()) {
-        injectCommands_P(
-            PSTR("M600"));// MEL_MOD will park, eject filament, then resume to load and continue
-        //pausePrint();
-        //printer_state = AC_printer_pausing;
-        //pause_state = AC_paused_filament_lack;
+      if(isPrintingFromMedia()) {
+        pausePrint();
+        printer_state = AC_printer_pausing;
+        pause_state = AC_paused_filament_lack;
       }
     }
   }
@@ -1660,12 +1656,15 @@ void DgusTFT::page3_handle(void) {
 #endif
       if (pause_state == AC_paused_idle || pause_state == AC_paused_filament_lack ||
           printer_state == AC_printer_resuming_from_power_outage) {
-        if (READ(FIL_RUNOUT_PIN) == getFilamentRunoutOriginState()) {
+        if (!getFilamentRunoutState())
+        {
           printer_state = AC_printer_idle;
           pause_state = AC_paused_idle;
           resumePrint();
           ChangePageOfTFT(PAGE_STATUS2);    // show pause print (normal print page)
-        } else {
+        }
+        else
+        {
           pop_up_index = 15;
         }
         flash_time = millis();
@@ -1739,7 +1738,7 @@ void DgusTFT::page4_handle(void) {
 
     case 1: // return
     {
-      if (isPrintingFromMedia() == false) {
+      if (!isPrintingFromMedia()) {
         //            if(card.sdprinting==false)//only is idle status can return
         ChangePageOfTFT(PAGE_FILE);
       }
@@ -1779,7 +1778,7 @@ void DgusTFT::page4_handle(void) {
       SendValueToTFT(feedrate_last, TXT_ADJUST_SPEED);
       SendValueToTFT((uint16_t)
       getActualFan_percent(FAN0), TXT_FAN_SPEED_TARGET);
-      SendTxtToTFT(ftostr52sprj(getZOffset_mm()), TXT_LEVEL_OFFSET);
+      SendTxtToTFT(ftostr12ns(getZOffset_mm()), TXT_LEVEL_OFFSET);
 
       break;
   }
@@ -2805,7 +2804,7 @@ void DgusTFT::page27_handle(void) {
       }
 
       setFeedrate_percent(100);           // resume print speed to 100
-      clearProgress_seconds_elapsed();    // clear print time elapsed
+      print_job_timer.reset();            // clear print time elapsed
     }
       break;
 
@@ -3438,10 +3437,11 @@ void DgusTFT::page202_handle(void)  // probe precheck ok
 #endif
 
   delay(3000);
-
-  injectCommands_P(PSTR("M851 Z0\nG28\nG29"));
-  printer_state = AC_printer_probing;
   ChangePageOfTFT(PAGE_LEVELING);
+  printer_state = AC_printer_probing;
+  injectCommands_P(PSTR("M851 Z0\nG28\nG29"));
+
+
 }
 
 void DgusTFT::page203_handle(void)    // probe precheck failed

@@ -154,17 +154,12 @@ class TFilamentMonitor : public FilamentMonitorBase {
             for (uint8_t i = 0; i < 8; ++i) SERIAL_ECHO('0' + char(runout_flags[i]));
             SERIAL_ECHOLNPGM(" -> ", extruder, " RUN OUT");
           #endif
-            if(!sensor.state_original) {
-                filament_ran_out = true;
-                event_filament_runout(extruder);
-                planner.synchronize();
-            }
-            sensor.state_original = 0;
+
+          filament_ran_out = true;
+          event_filament_runout(extruder);
+          planner.synchronize();
         }
       }
-    }
-    static inline uint8_t get_state_original() {
-        return sensor.state_original;
     }
 };
 
@@ -186,14 +181,11 @@ class FilamentSensorBase {
     #endif
 
   public:
-    static uint8_t state_original;
-
     static void setup() {
       #define _INIT_RUNOUT_PIN(P,S,U,D) do{ if (ENABLED(U)) SET_INPUT_PULLUP(P); else if (ENABLED(D)) SET_INPUT_PULLDOWN(P); else SET_INPUT(P); }while(0);
       #define  INIT_RUNOUT_PIN(N) _INIT_RUNOUT_PIN(FIL_RUNOUT##N##_PIN, FIL_RUNOUT##N##_STATE, FIL_RUNOUT##N##_PULLUP, FIL_RUNOUT##N##_PULLDOWN);
       REPEAT_1(NUM_RUNOUT_SENSORS, INIT_RUNOUT_PIN)
       #undef INIT_RUNOUT_PIN
-        state_original = READ(FIL_RUNOUT1_PIN); // Only valid for the main Runout Sensor
 
       #if ENABLED(FILAMENT_SWITCH_AND_MOTION)
         #define INIT_MOTION_PIN(N) _INIT_RUNOUT_PIN(FIL_MOTION##N##_PIN, FIL_MOTION##N##_STATE, FIL_MOTION##N##_PULLUP, FIL_MOTION##N##_PULLDOWN);
