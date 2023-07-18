@@ -485,7 +485,7 @@ namespace Anycubic {
       static void page211_212_handle(void);
       static void page213_handle(void);// MEL_MOD printer stats page (213)
       static void pop_up_manager(void);
-	  static void printerStatsToTFT(void);//MEL_MOD
+  	  static void printerStatsToTFT(void);//MEL_MOD
 
       void SendtoTFT(PGM_P);
       void SendtoTFTLN(PGM_P);
