@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdint.h>
 
 #define LD_FLASH_START 0x8000u
@@ -14,9 +15,13 @@ extern "C"
 #endif
 
 void get_all_clock(void);
+
 void endstop_pin_init(void);
+
 void stepper_pin_init(void);
+
 void heater_pin_init(void);
+
 void fan_pin_init(void);
 
 #ifdef __cplusplus

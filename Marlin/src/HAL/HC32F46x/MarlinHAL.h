@@ -1,7 +1,8 @@
 #pragma once
+
 #include <stdint.h>
 
-#define ADC_RESOLUTION		12
+#define ADC_RESOLUTION    12
 #define HAL_ADC_VREF        3.3
 #define HAL_ADC_RESOLUTION  ADC_RESOLUTION // 12
 #define HAL_START_ADC(pin)  HAL_adc_start(pin)
@@ -10,83 +11,87 @@
 
 typedef int16_t pin_t;
 
-class MarlinHAL
-{
+class MarlinHAL {
 public:
-    // Earliest possible init, before setup()
-    MarlinHAL();
+  // Earliest possible init, before setup()
+  MarlinHAL();
 
-    // Watchdog
-    static void watchdog_init();
-    static void watchdog_refresh();
+  // Watchdog
+  static void watchdog_init();
 
-    static void init();       // Called early in setup()
-    static void init_board(); // Called less early in setup()
-    static void reboot();     // Restart the firmware from 0x0
+  static void watchdog_refresh();
 
-    // Interrupts
-    static bool isr_state();
-    static void isr_on();
-    static void isr_off();
+  static void init();       // Called early in setup()
+  static void init_board(); // Called less early in setup()
+  static void reboot();     // Restart the firmware from 0x0
 
-    static void delay_ms(const int ms);
+  // Interrupts
+  static bool isr_state();
 
-    // Tasks, called from idle()
-    static void idletask();
+  static void isr_on();
 
-    // Reset
-    static uint8_t get_reset_source();
-    static void clear_reset_source();
+  static void isr_off();
 
-    // Free SRAM
-    static int freeMemory();
+  static void delay_ms(const int ms);
 
-    //
-    // ADC Methods
-    //
+  // Tasks, called from idle()
+  static void idletask();
 
-    static uint16_t adc_result;
+  // Reset
+  static uint8_t get_reset_source();
 
-    // Called by Temperature::init once at startup
-    static void adc_init();
+  static void clear_reset_source();
 
-    // Called by Temperature::init for each sensor at startup
-    static void adc_enable(const pin_t pin);
+  // Free SRAM
+  static int freeMemory();
 
-    // Begin ADC sampling on the given pin. Called from Temperature::isr!
-    static void adc_start(const pin_t pin);
+  //
+  // ADC Methods
+  //
 
-    // Is the ADC ready for reading?
-    static bool adc_ready();
+  static uint16_t adc_result;
 
-    // The current value of the ADC register
-    static uint16_t adc_value();
+  // Called by Temperature::init once at startup
+  static void adc_init();
+
+  // Called by Temperature::init for each sensor at startup
+  static void adc_enable(const pin_t pin);
+
+  // Begin ADC sampling on the given pin. Called from Temperature::isr!
+  static void adc_start(const pin_t pin);
+
+  // Is the ADC ready for reading?
+  static bool adc_ready();
+
+  // The current value of the ADC register
+  static uint16_t adc_value();
 
 //    static void adc_start_conversion(const uint8_t adc_pin);
-    /**
-     * Set the PWM duty cycle for the pin to the given value.
-     * Optionally invert the duty cycle [default = false]
-     * Optionally change the maximum size of the provided value to enable finer PWM duty control [default = 255]
-     * The timer must be pre-configured with set_pwm_frequency() if the default frequency is not desired.
-     */
-    static void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t = 255, const bool = false);
+  /**
+   * Set the PWM duty cycle for the pin to the given value.
+   * Optionally invert the duty cycle [default = false]
+   * Optionally change the maximum size of the provided value to enable finer PWM duty control [default = 255]
+   * The timer must be pre-configured with set_pwm_frequency() if the default frequency is not desired.
+   */
+  static void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t = 255, const bool = false);
 
-    /**
-     * Set the frequency of the timer for the given pin.
-     * All Timer PWM pins run at the same frequency.
-     */
-    static void set_pwm_frequency(const pin_t pin, const uint16_t f_desired);
+  /**
+   * Set the frequency of the timer for the given pin.
+   * All Timer PWM pins run at the same frequency.
+   */
+  static void set_pwm_frequency(const pin_t pin, const uint16_t f_desired);
 
 private:
-    /**
-     * pin number of the last pin that was used with adc_start()
-     */
-    static pin_t last_adc_pin;
+  /**
+   * pin number of the last pin that was used with adc_start()
+   */
+  static pin_t last_adc_pin;
 };
 
 // M997: trigger firmware update from sd card (after upload)
 // on HC32F46x, a reboot is enough to do this
 #ifndef PLATFORM_M997_SUPPORT
-  #define PLATFORM_M997_SUPPORT
+#define PLATFORM_M997_SUPPORT
 #endif
+
 void flashFirmware(const int16_t);

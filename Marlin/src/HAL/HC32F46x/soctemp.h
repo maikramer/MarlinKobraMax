@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdio.h>
 #include "Arduino.h"
 
@@ -6,15 +7,16 @@
 #define SOC_CRITICAL_TEMP 90
 #define SOC_TEMP_CHECK_INTERVAL 1000
 
-class SOCTemp
-{
+class SOCTemp {
 public:
-    static void init();
-    static bool criticalTemperatureReached();
+  static void init();
+
+  static bool criticalTemperatureReached();
 
 private:
-    static bool shouldCheck();
-    static uint32_t lastCheckMillis;
+  static bool shouldCheck();
+
+  static uint32_t lastCheckMillis;
 };
 
 #if SOC_CRITICAL_TEMP < SOC_WARN_TEMP

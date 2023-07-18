@@ -20,10 +20,15 @@
  *
  */
 #pragma once
+
 #include "../../inc/MarlinConfig.h"
 
 bool SDIO_Init();
+
 bool SDIO_ReadBlock(uint32_t block, uint8_t *dst);
+
 bool SDIO_WriteBlock(uint32_t block, const uint8_t *src);
+
 bool SDIO_IsReady();
+
 uint32_t SDIO_GetCardSize();

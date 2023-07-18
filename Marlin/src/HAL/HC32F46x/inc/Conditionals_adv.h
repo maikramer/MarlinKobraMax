@@ -22,7 +22,7 @@
 #pragma once
 
 #if ALL(HAS_MEDIA, USBD_USE_CDC_MSC) && DISABLED(NO_SD_HOST_DRIVE)
-  #define HAS_SD_HOST_DRIVE 1
+#define HAS_SD_HOST_DRIVE 1
 #endif
 
 // The Sensitive Pins array is not optimizable

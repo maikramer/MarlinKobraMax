@@ -17,6 +17,7 @@
  *
  */
 #pragma once
+
 #include "fastio.h"
 #include "../../inc/MarlinConfig.h"
 
@@ -75,49 +76,42 @@
 //   return VALID_PIN(pin) ? _GET_MODE(pin) : -1;
 // }
 
-static pin_t DIGITAL_PIN_TO_ANALOG_PIN(pin_t pin)
-{
-    if (!VALID_PIN(pin))
-        return -1;
-    int8_t adc_channel = int8_t(PIN_MAP[pin].adc_channel);
-    return pin_t(adc_channel);
+static pin_t DIGITAL_PIN_TO_ANALOG_PIN(pin_t pin) {
+  if (!VALID_PIN(pin))
+    return -1;
+  int8_t adc_channel = int8_t(PIN_MAP[pin].adc_channel);
+  return pin_t(adc_channel);
 }
 
-static bool IS_ANALOG(pin_t pin)
-{
-    if (!VALID_PIN(pin))
-        return false;
-    if (PIN_MAP[pin].adc_channel != ADC_PIN_INVALID)
-    {
-        return _GET_MODE(pin) == INPUT_ANALOG && !M43_NEVER_TOUCH(pin);
-    }
-
+static bool IS_ANALOG(pin_t pin) {
+  if (!VALID_PIN(pin))
     return false;
+  if (PIN_MAP[pin].adc_channel != ADC_PIN_INVALID) {
+    return _GET_MODE(pin) == INPUT_ANALOG && !M43_NEVER_TOUCH(pin);
+  }
+
+  return false;
 }
 
-static WiringPinMode GET_PINMODE(const pin_t pin)
-{
-    return getPinMode(pin);
+static WiringPinMode GET_PINMODE(const pin_t pin) {
+  return getPinMode(pin);
 }
 
-static bool GET_ARRAY_IS_DIGITAL(const int16_t array_pin)
-{
-    const pin_t pin = GET_ARRAY_PIN(array_pin);
-    return (!IS_ANALOG(pin));
+static bool GET_ARRAY_IS_DIGITAL(const int16_t array_pin) {
+  const pin_t pin = GET_ARRAY_PIN(array_pin);
+  return (!IS_ANALOG(pin));
 }
 
-static void pwm_details(const pin_t pin)
-{
-    // TODO stub
+static void pwm_details(const pin_t pin) {
+
 }
 
-static void print_port(pin_t pin)
-{
-    const char port = 'A' + char(pin >> 4); // pin div 16
-    const int16_t gbit = PIN_MAP[pin].bit_pos;
-    char buffer[8];
-    sprintf_P(buffer, PSTR("P%c%hd "), port, gbit);
-    if (gbit < 10)
-        SERIAL_CHAR(' ');
-    SERIAL_ECHO(buffer);
+static void print_port(pin_t pin) {
+  const char port = 'A' + char(pin >> 4); // pin div 16
+  const int16_t gbit = PIN_MAP[pin].bit_pos;
+  char buffer[8];
+  sprintf_P(buffer, PSTR("P%c%hd "), port, gbit);
+  if (gbit < 10)
+    SERIAL_CHAR(' ');
+  SERIAL_ECHO(buffer);
 }
