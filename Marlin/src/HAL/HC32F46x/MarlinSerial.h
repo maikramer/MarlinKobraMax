@@ -28,30 +28,30 @@
 // #define UART_IRQ_PRIO 1
 
 struct MarlinSerial : public HardwareSerial {
-    MarlinSerial(struct usart_config_t *config, uint8_t tx_pin, uint8_t rx_pin) : HardwareSerial(config,
-                                                                                             tx_pin,
-                                                                                             rx_pin) {}
+  MarlinSerial(struct usart_config_t *config, uint8_t tx_pin, uint8_t rx_pin) : HardwareSerial(config,
+                                                                                               tx_pin,
+                                                                                               rx_pin) {}
 
 #ifdef UART_IRQ_PRIO
-    void setPriority()
-    {
-      NVIC_SetPriority(c_dev()->interrupts.rx_data_available.interrupt_number, UART_IRQ_PRIO);
-      NVIC_SetPriority(c_dev()->interrupts.rx_error.interrupt_number, UART_IRQ_PRIO);
-      NVIC_SetPriority(c_dev()->interrupts.tx_buffer_empty.interrupt_number, UART_IRQ_PRIO);
-      NVIC_SetPriority(c_dev()->interrupts.tx_complete.interrupt_number, UART_IRQ_PRIO);
-    }
-
-  void begin(uint32 baud)
+  void setPriority()
   {
-    HardwareSerial::begin(baud);
-    setPriority();
+    NVIC_SetPriority(c_dev()->interrupts.rx_data_available.interrupt_number, UART_IRQ_PRIO);
+    NVIC_SetPriority(c_dev()->interrupts.rx_error.interrupt_number, UART_IRQ_PRIO);
+    NVIC_SetPriority(c_dev()->interrupts.tx_buffer_empty.interrupt_number, UART_IRQ_PRIO);
+    NVIC_SetPriority(c_dev()->interrupts.tx_complete.interrupt_number, UART_IRQ_PRIO);
   }
 
-  void begin(uint32 baud, uint8_t config)
-  {
-    HardwareSerial::begin(baud, config);
-    setPriority();
-  }
+void begin(uint32 baud)
+{
+  HardwareSerial::begin(baud);
+  setPriority();
+}
+
+void begin(uint32 baud, uint8_t config)
+{
+  HardwareSerial::begin(baud, config);
+  setPriority();
+}
 #endif
 };
 

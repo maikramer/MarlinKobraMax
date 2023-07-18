@@ -8,20 +8,17 @@ IWatchdog WDT;
 //
 // IWatchdog class implementation
 //
-void IWatchdog::begin(const stc_wdt_init_t *config)
-{
-    WDT_Init(config);
+void IWatchdog::begin(const stc_wdt_init_t *config) {
+  WDT_Init(config);
 
-    // reload watchdog after init
-    reload();
+  // reload watchdog after init
+  reload();
 }
 
-void IWatchdog::reload(void)
-{
-    WDT_RefreshCounter();
+void IWatchdog::reload(void) {
+  WDT_RefreshCounter();
 }
 
-uint16_t IWatchdog::getCounter(void)
-{
-    return WDT_GetCountValue();
+uint16_t IWatchdog::getCounter(void) {
+  return WDT_GetCountValue();
 }

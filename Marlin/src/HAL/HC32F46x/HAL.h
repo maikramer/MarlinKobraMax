@@ -76,7 +76,7 @@ static_assert(false, "SERIAL_PORT_2 must be from 1 to " STRINGIFY(NUM_UARTS) "."
 #define MYSERIAL3 MSERIAL(SERIAL_PORT_3)
 #else
 #define MYSERIAL3 MSERIAL(1) // dummy port
-    static_assert(false, "SERIAL_PORT_3 must be from 1 to " STRINGIFY(NUM_UARTS) ".")
+static_assert(false, "SERIAL_PORT_3 must be from 1 to " STRINGIFY(NUM_UARTS) ".")
 #endif
 #endif
 
@@ -87,7 +87,7 @@ static_assert(false, "SERIAL_PORT_2 must be from 1 to " STRINGIFY(NUM_UARTS) "."
 #define MYSERIAL3 MSERIAL(SERIAL_PORT_3)
 #else
 #define MYSERIAL3 MSERIAL(1) // dummy port
-    static_assert(false, "SERIAL_PORT_3 must be from 1 to " STRINGIFY(NUM_UARTS) ".")
+static_assert(false, "SERIAL_PORT_3 must be from 1 to " STRINGIFY(NUM_UARTS) ".")
 #endif
 #endif
 
@@ -98,7 +98,7 @@ static_assert(false, "SERIAL_PORT_2 must be from 1 to " STRINGIFY(NUM_UARTS) "."
 #define LCD_SERIAL MSERIAL(LCD_SERIAL_PORT)
 #else
 #define LCD_SERIAL MSERIAL(1) // dummy port
-        static_assert(false, "LCD_SERIAL_PORT must be from 1 to " STRINGIFY(NUM_UARTS) ".")
+static_assert(false, "LCD_SERIAL_PORT must be from 1 to " STRINGIFY(NUM_UARTS) ".")
 #endif
 
 #if HAS_DGUS_LCD
@@ -110,7 +110,9 @@ static_assert(false, "SERIAL_PORT_2 must be from 1 to " STRINGIFY(NUM_UARTS) "."
 // Emergency Parser
 //
 #if ENABLED(EMERGENCY_PARSER)
-extern "C" void usart_rx_irq_hook(uint8_t ch, uint8_t usart);
+extern "C" void usart_rx_irq_hook(uint8_t ch,
+uint8_t usart
+);
 #endif
 
 //
