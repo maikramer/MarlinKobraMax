@@ -196,7 +196,7 @@
 #define TXT_RECORT_2             (0x2000+28*0x30)  
 #define TXT_RECORT_3             (0x2000+29*0x30)  
 #define TXT_RECORT_4             (0x2000+30*0x30)  
-#define TXT_RECORT_5             (0x2000+31*0x30) 
+#define TXT_RECORT_5             (0x2000+31*0x30)
 
 // ADVANCE LEVEL  TXT
 #define TXT_LEVEL_OFFSET             (0x2000+32*0x30) 
