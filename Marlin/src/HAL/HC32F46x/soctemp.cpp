@@ -7,9 +7,7 @@
 
 uint32_t SOCTemp::lastCheckMillis = 0;
 
-void SOCTemp::init() {
-  H32OTS::init();
-}
+void SOCTemp::init() { H32OTS::init(); }
 
 bool SOCTemp::criticalTemperatureReached() {
   if (shouldCheck()) {
@@ -19,7 +17,10 @@ bool SOCTemp::criticalTemperatureReached() {
       if (temperature >= SOC_WARN_TEMP) {
         char buf[10];
         dtostrf(temperature, 8, 1, buf);
-        printf("SoC temperature %s C is above warning treshold " SOC_WARN_TEMP_STR " C\n", buf);
+        printf(
+            "SoC temperature %s C is above warning treshold " SOC_WARN_TEMP_STR
+            " C\n",
+            buf);
       }
 
       // check critical temperature

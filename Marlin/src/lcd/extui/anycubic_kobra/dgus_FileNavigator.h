@@ -29,33 +29,32 @@
  *  (not affiliated with Anycubic, Ltd.)
  */
 
-#include "dgus_tft_defs.h"
 #include "../ui_api.h"
+#include "dgus_tft_defs.h"
 
 using namespace ExtUI;
 
 namespace Anycubic {
   class FileNavigator {
-    public:
-      FileNavigator();
+  public:
+    FileNavigator();
 
-      static FileList  filelist;
-      
-      void   reset();
-      void   getFiles(uint16_t);
-      void   upDIR();
-      void   changeDIR(char *);
-      void   sendFile();
-      void   refresh();
-      char * getCurrentFolderName();
-      uint16_t getFileNum();
+    static FileList filelist;
 
-    private:
-      
-      static char      currentfoldername[MAX_PATH_LEN];
-      static uint16_t  lastindex;
-      static uint8_t   folderdepth;
-      static uint16_t  currentindex;
+    void reset();
+    void getFiles(uint16_t);
+    void upDIR();
+    void changeDIR(char *);
+    void sendFile();
+    void refresh();
+    char *getCurrentFolderName();
+    uint16_t getFileNum();
+
+  private:
+    static char currentfoldername[MAX_PATH_LEN];
+    static uint16_t lastindex;
+    static uint8_t folderdepth;
+    static uint16_t currentindex;
   };
   extern FileNavigator filenavigator;
-}
+} // namespace Anycubic

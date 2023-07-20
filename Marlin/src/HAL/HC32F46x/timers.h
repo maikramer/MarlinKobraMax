@@ -21,9 +21,9 @@
  */
 #pragma once
 
-#include <stdint.h>
 #include "bsp_timer.h"
 #include "hc32f460_timer0.h"
+#include <stdint.h>
 
 //
 // Timer Types
@@ -36,11 +36,11 @@ typedef uint32_t hal_timer_t;
 //
 
 // frequency of the timer peripheral
-#define HAL_TIMER_RATE (F_CPU/2)
+#define HAL_TIMER_RATE (F_CPU / 2)
 
 // temperature timer (Timer41)
 #define TEMP_TIMER_NUM 1
-#define TEMP_TIMER_RATE 1000 // 1kHz
+#define TEMP_TIMER_RATE 1000                 // 1kHz
 #define TEMP_TIMER_FREQUENCY TEMP_TIMER_RATE // alias for Marlin
 
 // stepper timer (Timer42)
@@ -83,12 +83,16 @@ void HAL_timer_isr_epilogue(const uint8_t timer_num);
 //
 // HAL function aliases
 //
-#define ENABLE_STEPPER_DRIVER_INTERRUPT() HAL_timer_enable_interrupt(STEP_TIMER_NUM)
-#define DISABLE_STEPPER_DRIVER_INTERRUPT() HAL_timer_disable_interrupt(STEP_TIMER_NUM)
+#define ENABLE_STEPPER_DRIVER_INTERRUPT()                                      \
+  HAL_timer_enable_interrupt(STEP_TIMER_NUM)
+#define DISABLE_STEPPER_DRIVER_INTERRUPT()                                     \
+  HAL_timer_disable_interrupt(STEP_TIMER_NUM)
 #define STEPPER_ISR_ENABLED() HAL_timer_interrupt_enabled(STEP_TIMER_NUM)
 
-#define ENABLE_TEMPERATURE_INTERRUPT() HAL_timer_enable_interrupt(TEMP_TIMER_NUM)
-#define DISABLE_TEMPERATURE_INTERRUPT() HAL_timer_disable_interrupt(TEMP_TIMER_NUM);
+#define ENABLE_TEMPERATURE_INTERRUPT()                                         \
+  HAL_timer_enable_interrupt(TEMP_TIMER_NUM)
+#define DISABLE_TEMPERATURE_INTERRUPT()                                        \
+  HAL_timer_disable_interrupt(TEMP_TIMER_NUM);
 
 //
 // HAL ISR callbacks

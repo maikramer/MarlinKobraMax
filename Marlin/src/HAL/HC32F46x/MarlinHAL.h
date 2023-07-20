@@ -2,12 +2,12 @@
 
 #include <stdint.h>
 
-#define ADC_RESOLUTION    12
-#define HAL_ADC_VREF        3.3
-#define HAL_ADC_RESOLUTION  ADC_RESOLUTION // 12
-#define HAL_START_ADC(pin)  HAL_adc_start(pin)
-#define HAL_READ_ADC()      HAL_adc_read()
-#define HAL_ADC_READY()     true
+#define ADC_RESOLUTION 12
+#define HAL_ADC_VREF 3.3
+#define HAL_ADC_RESOLUTION ADC_RESOLUTION // 12
+#define HAL_START_ADC(pin) HAL_adc_start(pin)
+#define HAL_READ_ADC() HAL_adc_read()
+#define HAL_ADC_READY() true
 
 typedef int16_t pin_t;
 
@@ -66,14 +66,16 @@ public:
   // The current value of the ADC register
   static uint16_t adc_value();
 
-//    static void adc_start_conversion(const uint8_t adc_pin);
+  //    static void adc_start_conversion(const uint8_t adc_pin);
   /**
    * Set the PWM duty cycle for the pin to the given value.
    * Optionally invert the duty cycle [default = false]
-   * Optionally change the maximum size of the provided value to enable finer PWM duty control [default = 255]
-   * The timer must be pre-configured with set_pwm_frequency() if the default frequency is not desired.
+   * Optionally change the maximum size of the provided value to enable finer
+   * PWM duty control [default = 255] The timer must be pre-configured with
+   * set_pwm_frequency() if the default frequency is not desired.
    */
-  static void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t = 255, const bool = false);
+  static void set_pwm_duty(const pin_t pin, const uint16_t v,
+                           const uint16_t = 255, const bool = false);
 
   /**
    * Set the frequency of the timer for the given pin.
@@ -91,7 +93,7 @@ private:
 // M997: trigger firmware update from sd card (after upload)
 // on HC32F46x, a reboot is enough to do this
 #ifndef PLATFORM_M997_SUPPORT
-#define PLATFORM_M997_SUPPORT
+  #define PLATFORM_M997_SUPPORT
 #endif
 
 void flashFirmware(const int16_t);

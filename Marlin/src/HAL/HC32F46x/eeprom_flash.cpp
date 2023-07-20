@@ -29,15 +29,15 @@
 
 #ifdef TARGET_HC32F46x
 
-#include "../../inc/MarlinConfig.h"
+  #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(FLASH_EEPROM_EMULATION)
+  #if ENABLED(FLASH_EEPROM_EMULATION)
 
-#include "../shared/eeprom_api.h"
-#include "flash.h"
+    #include "../shared/eeprom_api.h"
+    #include "flash.h"
 /**
- * The STM32 HAL supports chips that deal with "pages" and some with "sectors" and some that
- * even have multiple "banks" of flash.
+ * The STM32 HAL supports chips that deal with "pages" and some with "sectors"
+ * and some that even have multiple "banks" of flash.
  *
  * This code is a bit of a mashup of
  *   framework-arduinoststm32/cores/arduino/stm32/stm32_eeprom.c
@@ -45,16 +45,17 @@
  *
  * This has only be written against those that use a single "sector" design.
  *
- * Those that deal with "pages" could be made to work. Looking at the STM32F07 for example, there are
- * 128 "pages", each 2kB in size. If we continued with our EEPROM being 4Kb, we'd always need to operate
- * on 2 of these pages. Each write, we'd use 2 different pages from a pool of pages until we are done.
+ * Those that deal with "pages" could be made to work. Looking at the STM32F07
+ * for example, there are 128 "pages", each 2kB in size. If we continued with
+ * our EEPROM being 4Kb, we'd always need to operate on 2 of these pages. Each
+ * write, we'd use 2 different pages from a pool of pages until we are done.
  */
 static bool eeprom_data_written = false;
 
 size_t PersistentStore::capacity() { return MARLIN_EEPROM_SIZE; }
 
 bool PersistentStore::access_start() {
-    Intflash::eeprom_buffer_fill();
+  Intflash::eeprom_buffer_fill();
 
   return true;
 }
@@ -62,25 +63,26 @@ bool PersistentStore::access_start() {
 bool PersistentStore::access_finish() {
 
   if (eeprom_data_written) {
-      TERN_(HAS_PAUSE_SERVO_OUTPUT, PAUSE_SERVO_OUTPUT());
-      hal.isr_off();
-      Intflash::eeprom_buffer_flush();
-      hal.isr_on();
-      TERN_(HAS_PAUSE_SERVO_OUTPUT, RESUME_SERVO_OUTPUT());
+    TERN_(HAS_PAUSE_SERVO_OUTPUT, PAUSE_SERVO_OUTPUT());
+    hal.isr_off();
+    Intflash::eeprom_buffer_flush();
+    hal.isr_on();
+    TERN_(HAS_PAUSE_SERVO_OUTPUT, RESUME_SERVO_OUTPUT());
 
-      eeprom_data_written = false;
+    eeprom_data_written = false;
   }
 
   return true;
 }
 
-bool PersistentStore::write_data(int &pos, const uint8_t *value, size_t size, uint16_t *crc) {
+bool PersistentStore::write_data(int &pos, const uint8_t *value, size_t size,
+                                 uint16_t *crc) {
   while (size--) {
     uint8_t v = *value;
-      if (v != Intflash::eeprom_buffered_read_byte(pos)) {
-        Intflash::eeprom_buffered_write_byte(pos, v);
-        eeprom_data_written = true;
-      }
+    if (v != Intflash::eeprom_buffered_read_byte(pos)) {
+      Intflash::eeprom_buffered_write_byte(pos, v);
+      eeprom_data_written = true;
+    }
     crc16(crc, &v, 1);
     pos++;
     value++;
@@ -88,10 +90,13 @@ bool PersistentStore::write_data(int &pos, const uint8_t *value, size_t size, ui
   return false;
 }
 
-bool PersistentStore::read_data(int &pos, uint8_t *value, size_t size, uint16_t *crc, const bool writing/*=true*/) {
+bool PersistentStore::read_data(int &pos, uint8_t *value, size_t size,
+                                uint16_t *crc, const bool writing /*=true*/) {
   do {
-    const uint8_t c = TERN(FLASH_EEPROM_LEVELING, ram_eeprom[pos], Intflash::eeprom_buffered_read_byte(pos));
-    if (writing) *value = c;
+    const uint8_t c = TERN(FLASH_EEPROM_LEVELING, ram_eeprom[pos],
+                           Intflash::eeprom_buffered_read_byte(pos));
+    if (writing)
+      *value = c;
     crc16(crc, &c, 1);
     pos++;
     value++;
@@ -99,6 +104,5 @@ bool PersistentStore::read_data(int &pos, uint8_t *value, size_t size, uint16_t 
   return false;
 }
 
-
-#endif // FLASH_EEPROM_EMULATION
-#endif // TARGET_HC32F46x
+  #endif // FLASH_EEPROM_EMULATION
+#endif   // TARGET_HC32F46x

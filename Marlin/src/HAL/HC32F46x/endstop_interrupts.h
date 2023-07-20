@@ -28,23 +28,26 @@
  * On STM32F, all pins support external interrupt capability.
  * Any pin can be used for external interrupts, but there are some restrictions.
  * At most 16 different external interrupts can be used at one time.
- * Further, you can’t just pick any 16 pins to use. This is because every pin on the STM32
- * connects to what is called an EXTI line, and only one pin per EXTI line can be used for external interrupts at a time
- * Check the Reference Manual of the MCU to confirm which line is used by each pin
+ * Further, you can’t just pick any 16 pins to use. This is because every pin on
+ * the STM32 connects to what is called an EXTI line, and only one pin per EXTI
+ * line can be used for external interrupts at a time Check the Reference Manual
+ * of the MCU to confirm which line is used by each pin
  */
 
 /**
  * Endstop Interrupts
  *
  * Without endstop interrupts the endstop pins must be polled continually in
- * the temperature-ISR via endstops.update(), most of the time finding no change.
- * With this feature endstops.update() is called only when we know that at
- * least one endstop has changed state, saving valuable CPU cycles.
+ * the temperature-ISR via endstops.update(), most of the time finding no
+ * change. With this feature endstops.update() is called only when we know that
+ * at least one endstop has changed state, saving valuable CPU cycles.
  *
- * This feature only works when all used endstop pins can generate an 'external interrupt'.
+ * This feature only works when all used endstop pins can generate an 'external
+ * interrupt'.
  *
- * Test whether pins issue interrupts on your board by flashing 'pin_interrupt_test.ino'.
- * (Located in Marlin/buildroot/share/pin_interrupt_test/pin_interrupt_test.ino)
+ * Test whether pins issue interrupts on your board by flashing
+ * 'pin_interrupt_test.ino'. (Located in
+ * Marlin/buildroot/share/pin_interrupt_test/pin_interrupt_test.ino)
  */
 
 void setup_endstop_interrupts();
