@@ -173,17 +173,9 @@ namespace Anycubic {
     // opt_set    FIL_RUNOUT_STATE HIGH  // Pin state indicating that filament
     // is NOT present. opt_enable FIL_RUNOUT_PULLUP
 
-    // Reset Filament Sensor
-    injectCommands_P("M412 R1");
-
     TFTSer.begin(115200);
 
-    // Signal Board has reset
-    //    SendtoTFTLN(AC_msg_main_board_has_reset);
-
-    // Enable levelling and Disable end stops during print
-    // as Z home places nozzle above the bed so we need to allow it past the end
-    // stops
+    SendtoTFTLN(AC_msg_main_board_has_reset);
 
     injectCommands_P(AC_cmnd_enable_levelling);
 
@@ -193,7 +185,7 @@ namespace Anycubic {
   #if ACDEBUGLEVEL
     SERIAL_ECHOLNPGM("AC Debug Level ", ACDEBUGLEVEL);
   #endif
-    //    SendtoTFTLN(AC_msg_ready);
+    SendtoTFTLN(AC_msg_ready);
   }
 
   void DgusTFT::ParamInit() {
@@ -284,17 +276,17 @@ namespace Anycubic {
 
       page213_handle();
 
-  } else {
-    if (120 < page_index_now && page_index_now < 156) {
-      fun_array[page_index_now - 1 - 120]();
     } else {
-#if ACDEBUG(AC_MARLIN)
-      SERIAL_ECHOLN("lcd function not exists");
-      SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
-      SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
-#endif
+      if (120 < page_index_now && page_index_now < 156) {
+        fun_array[page_index_now - 1 - 120]();
+      } else {
+  #if ACDEBUG(AC_MARLIN)
+        SERIAL_ECHOLN("lcd function not exists");
+        SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
+        SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
+  #endif
+      }
     }
-  }
 
     pop_up_manager();
     key_value = 0;
@@ -688,13 +680,12 @@ namespace Anycubic {
   }
 
   void DgusTFT::MeshUpdate(const int8_t xpos, const int8_t ypos,
-                         const ExtUI::probe_state_t state) {
-    if(state == ExtUI::G29_POINT_START){
-
+                           const ExtUI::probe_state_t state) {
+    if (state == ExtUI::G29_POINT_START) {
     }
   }
 
-      // A helper to print PROGMEN string to the panel
+  // A helper to print PROGMEN string to the panel
   void DgusTFT::SendtoTFT(PGM_P str) {
   #if ACDEBUG(AC_SOME)
     serialprintPGM(str);
@@ -764,7 +755,7 @@ namespace Anycubic {
     p_u8--;
     data_buf[data_index++] = *p_u8;
 
-    strncpy(&data_buf[data_index], pdata, data_len);
+    memcpy(&data_buf[data_index], pdata, data_len);
     data_index += data_len;
 
     data_buf[data_index++] = 0xFF;
@@ -2981,28 +2972,12 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
 
   void DgusTFT::page202_handle(void) // probe precheck ok
   {
-    //        static millis_t flash_time = 0;
-    //        static millis_t probe_check_counter = 0;
-    //        static uint8_t probe_state_last = 0;
-    //        char str_buf[16];
-
-  #if PROBING_NOZZLE_TEMP || LEVELING_NOZZLE_TEMP
-    setTargetTemp_celsius(LEVELING_NOZZLE_TEMP, E0);
-  #endif
-
-  #if ANY(PREHEAT_BEFORE_PROBING, PREHEAT_BEFORE_LEVELING)
-    ChangePageOfTFT(PAGE_PROBE_PREHEATING);
-  #endif
     injectCommands_P(PSTR("M851 Z0\nG28\nG29"));
   }
 
   void DgusTFT::page203_handle(void) // probe precheck failed
   {
     static millis_t flash_time = 0;
-    //        static millis_t probe_check_counter = 0;
-    //        static uint8_t probe_state_last = 0;
-    //        char str_buf[16];
-
     if (millis() < (flash_time + 1500)) {
       return;
     }
@@ -3010,8 +2985,6 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
   }
 
   void DgusTFT::page207_209_handle(void) {
-    //      char str_buf[20];
-    //      unsigned int temp;
     switch (key_value) {
     case 0:
       break;
@@ -3229,7 +3202,7 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
 
   void DgusTFT::printerStatsToTFT(void) { // MEL_MOD printer statistics
     char str_buf[64];
-    char buffer[64];
+    char buffer[32];
     int32_t metresUsed, metresRemainder;
 
     printStatistics stats = print_job_timer.getStats(); // returns raw data
@@ -3258,13 +3231,19 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
 
     sprintf(str_buf, "Filament Used: %ld.%ldm", metresUsed, metresRemainder);
     SendTxtToTFT(str_buf, TXT_STATS_PRINTS_FILAMENT); // filament used in M
+  }
 
-    //	sprintf(str_buf, "eSteps: %f",
-    // VOLUMETRIC_UNIT(planner.settings.axis_steps_per_mm[E_AXIS]));
-    //	SendTxtToTFT(str_buf, TXT_STATS_PRINTS_FILAMENT);
-
-    // print_job_timer.showStats();//
-    // SERIAL_ECHOLNPGM("Total Prints2: ", buffer);
+  void DgusTFT::SendtoTFTLN(PGM_P fstr) {
+    if (fstr) {
+  #if ACDEBUG(AC_SOME)
+      DEBUG_ECHOPGM("> ");
+  #endif
+      SendtoTFT(fstr);
+  #if ACDEBUG(AC_SOME)
+      SERIAL_EOL();
+  #endif
+    }
+    TFTSer.println();
   }
 
 } // namespace Anycubic
