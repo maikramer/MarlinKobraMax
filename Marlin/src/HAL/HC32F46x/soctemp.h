@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdio.h>
 #include "Arduino.h"
+#include <stdio.h>
 
 #define SOC_WARN_TEMP 75
 #define SOC_CRITICAL_TEMP 90
@@ -20,5 +20,5 @@ private:
 };
 
 #if SOC_CRITICAL_TEMP < SOC_WARN_TEMP
-#error "SOC_CRITICAL_TEMP must be higher than SOC_WARN_TEMP"
+  #error "SOC_CRITICAL_TEMP must be higher than SOC_WARN_TEMP"
 #endif

@@ -5,7 +5,7 @@
 #include <hc32_ddl.h>
 
 #if (DDL_WDT_ENABLE != DDL_ON)
-#error "IWatchdog library requires WDT DDL to be enabled"
+  #error "IWatchdog library requires WDT DDL to be enabled"
 #endif
 
 class IWatchdog {

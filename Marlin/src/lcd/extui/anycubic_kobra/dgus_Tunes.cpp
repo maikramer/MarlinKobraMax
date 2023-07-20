@@ -37,12 +37,12 @@
 
 #if ENABLED(ANYCUBIC_LCD_KOBRA)
 
-#include "dgus_Tunes.h"
-#include "../ui_api.h"
+  #include "../ui_api.h"
+  #include "dgus_Tunes.h"
 
 namespace Anycubic {
 
-  void PlayTune(uint8_t beeperPin, const uint16_t *tune, uint8_t speed=1) {
+  void PlayTune(uint8_t beeperPin, const uint16_t *tune, uint8_t speed = 1) {
     uint8_t pos = 1;
     uint16_t wholenotelen = tune[0] / speed;
     do {
@@ -53,10 +53,11 @@ namespace Anycubic {
       ExtUI::delay_ms(notelen);
       pos += 2;
 
-      if (pos >= MAX_TUNE_LENGTH) break;
+      if (pos >= MAX_TUNE_LENGTH)
+        break;
     } while (tune[pos] != n_END);
   }
 
-}
+} // namespace Anycubic
 
 #endif // ANYCUBIC_LCD_KOBRA

@@ -21,36 +21,34 @@
  */
 
 #ifdef TARGET_HC32F46x
-#include "MarlinSerial.h"
-#include "../../inc/MarlinConfig.h"
-#include <drivers/usart/usart.h>
+  #include "MarlinSerial.h"
+  #include "../../inc/MarlinConfig.h"
+  #include <drivers/usart/usart.h>
 
 /**
  * Not every MarlinSerial instance should handle emergency parsing, as
  * it would not make sense to parse GCode from TMC responses
  */
-constexpr bool serial_handles_emergency(int port)
-{
+constexpr bool serial_handles_emergency(int port) {
   return false
-#ifdef SERIAL_PORT
+  #ifdef SERIAL_PORT
          || (SERIAL_PORT) == port
-#endif
-#ifdef SERIAL_PORT_2
+  #endif
+  #ifdef SERIAL_PORT_2
          || (SERIAL_PORT_2) == port
-#endif
-#ifdef LCD_SERIAL_PORT
+  #endif
+  #ifdef LCD_SERIAL_PORT
          || (LCD_SERIAL_PORT) == port
-#endif
+  #endif
       ;
 }
 
-//
-// define serial ports
-//
-#define DEFINE_HWSERIAL_MARLIN(name, n)      \
-  MSerialT name(serial_handles_emergency(n), \
-                &USART##n##_config, BOARD_USART##n##_TX_PIN, BOARD_USART##n##_RX_PIN);
-
+  //
+  // define serial ports
+  //
+  #define DEFINE_HWSERIAL_MARLIN(name, n)                                      \
+    MSerialT name(serial_handles_emergency(n), &USART##n##_config,             \
+                  BOARD_USART##n##_TX_PIN, BOARD_USART##n##_RX_PIN);
 
 DEFINE_HWSERIAL_MARLIN(MSerial2, 2);
 DEFINE_HWSERIAL_MARLIN(MSerial4, 4);
@@ -60,81 +58,90 @@ DEFINE_HWSERIAL_MARLIN(MSerial4, 4);
 //
 
 // Check the type of each serial port by passing it to a template function.
-// HardwareSerial is known to sometimes hang the controller when an error occurs,
-// so this case will fail the static assert. All other classes are assumed to be ok.
-template <typename T>
-constexpr bool IsSerialClassAllowed(const T &) { return true; }
+// HardwareSerial is known to sometimes hang the controller when an error
+// occurs, so this case will fail the static assert. All other classes are
+// assumed to be ok.
+template <typename T> constexpr bool IsSerialClassAllowed(const T &) {
+  return true;
+}
 constexpr bool IsSerialClassAllowed(const HardwareSerial &) { return false; }
 
-// If you encounter this error, replace SerialX with MSerialX, for example MSerial3.
-#define CHECK_CFG_SERIAL(A) static_assert(IsSerialClassAllowed(A), STRINGIFY(A) " is defined incorrectly");
-#define CHECK_AXIS_SERIAL(A) static_assert(IsSerialClassAllowed(A##_HARDWARE_SERIAL), STRINGIFY(A) "_HARDWARE_SERIAL must be defined in the form MSerial1, rather than Serial1");
+  // If you encounter this error, replace SerialX with MSerialX, for example
+  // MSerial3.
+  #define CHECK_CFG_SERIAL(A)                                                  \
+    static_assert(IsSerialClassAllowed(A),                                     \
+                  STRINGIFY(A) " is defined incorrectly");
+  #define CHECK_AXIS_SERIAL(A)                                                 \
+    static_assert(IsSerialClassAllowed(A##_HARDWARE_SERIAL),                   \
+                  STRINGIFY(A) "_HARDWARE_SERIAL must be defined in the form " \
+                               "MSerial1, rather than Serial1");
 
-// Non-TMC ports were already validated in HAL.h, so do not require verbose error messages.
-#ifdef MYSERIAL1
+  // Non-TMC ports were already validated in HAL.h, so do not require verbose
+  // error messages.
+  #ifdef MYSERIAL1
 CHECK_CFG_SERIAL(MYSERIAL1);
-#endif
-#ifdef MYSERIAL2
+  #endif
+  #ifdef MYSERIAL2
 CHECK_CFG_SERIAL(MYSERIAL2);
-#endif
-#ifdef LCD_SERIAL
+  #endif
+  #ifdef LCD_SERIAL
 CHECK_CFG_SERIAL(LCD_SERIAL);
-#endif
-#if AXIS_HAS_HW_SERIAL(X)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(X)
 CHECK_AXIS_SERIAL(X);
-#endif
-#if AXIS_HAS_HW_SERIAL(X2)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(X2)
 CHECK_AXIS_SERIAL(X2);
-#endif
-#if AXIS_HAS_HW_SERIAL(Y)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Y)
 CHECK_AXIS_SERIAL(Y);
-#endif
-#if AXIS_HAS_HW_SERIAL(Y2)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Y2)
 CHECK_AXIS_SERIAL(Y2);
-#endif
-#if AXIS_HAS_HW_SERIAL(Z)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Z)
 CHECK_AXIS_SERIAL(Z);
-#endif
-#if AXIS_HAS_HW_SERIAL(Z2)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Z2)
 CHECK_AXIS_SERIAL(Z2);
-#endif
-#if AXIS_HAS_HW_SERIAL(Z3)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Z3)
 CHECK_AXIS_SERIAL(Z3);
-#endif
-#if AXIS_HAS_HW_SERIAL(Z4)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(Z4)
 CHECK_AXIS_SERIAL(Z4);
-#endif
-#if AXIS_HAS_HW_SERIAL(I)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(I)
 CHECK_AXIS_SERIAL(I);
-#endif
-#if AXIS_HAS_HW_SERIAL(J)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(J)
 CHECK_AXIS_SERIAL(J);
-#endif
-#if AXIS_HAS_HW_SERIAL(K)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(K)
 CHECK_AXIS_SERIAL(K);
-#endif
-#if AXIS_HAS_HW_SERIAL(E0)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E0)
 CHECK_AXIS_SERIAL(E0);
-#endif
-#if AXIS_HAS_HW_SERIAL(E1)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E1)
 CHECK_AXIS_SERIAL(E1);
-#endif
-#if AXIS_HAS_HW_SERIAL(E2)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E2)
 CHECK_AXIS_SERIAL(E2);
-#endif
-#if AXIS_HAS_HW_SERIAL(E3)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E3)
 CHECK_AXIS_SERIAL(E3);
-#endif
-#if AXIS_HAS_HW_SERIAL(E4)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E4)
 CHECK_AXIS_SERIAL(E4);
-#endif
-#if AXIS_HAS_HW_SERIAL(E5)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E5)
 CHECK_AXIS_SERIAL(E5);
-#endif
-#if AXIS_HAS_HW_SERIAL(E6)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E6)
 CHECK_AXIS_SERIAL(E6);
-#endif
-#if AXIS_HAS_HW_SERIAL(E7)
+  #endif
+  #if AXIS_HAS_HW_SERIAL(E7)
 CHECK_AXIS_SERIAL(E7);
-#endif
+  #endif
 #endif // TARGET_HC32F46x

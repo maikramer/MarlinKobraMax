@@ -30,8 +30,8 @@
 
 #if ENABLED(ANYCUBIC_LCD_KOBRA)
 
-#include "../ui_api.h"
-#include "dgus_tft.h"
+  #include "../ui_api.h"
+  #include "dgus_tft.h"
 
 using namespace Anycubic;
 
@@ -54,9 +54,9 @@ namespace ExtUI {
   void onMediaRemoved() { Dgus.MediaEvent(AC_media_removed); }
 
   void onPlayTone(const uint16_t frequency, const uint16_t duration) {
-#if ENABLED(SPEAKER)
-    //::tone(BEEPER_PIN, frequency, duration);
-#endif
+  #if ENABLED(SPEAKER)
+      //      ::tone(BEEPER_PIN, frequency, duration);
+  #endif
   }
 
   void onPrintTimerStarted() { Dgus.TimerEvent(AC_timer_started); }
@@ -69,13 +69,15 @@ namespace ExtUI {
 
   void onFilamentRunout(const extruder_t) { Dgus.FilamentRunout(); }
 
-  void onUserConfirmRequired(const char *const msg) { Dgus.ConfirmationRequest(msg); }
+  void onUserConfirmRequired(const char *const msg) {
+    Dgus.ConfirmationRequest(msg);
+  }
 
   void onStatusChanged(const char *const msg) { Dgus.StatusChange(msg); }
 
   void onHomingStart() { Dgus.HomingStart(); }
 
-  void onHomingDone() {Dgus.HomingComplete();}
+  void onHomingDone() { Dgus.HomingComplete(); }
 
   void onFactoryReset() {
     Dgus.page_index_now = 121;
@@ -89,7 +91,7 @@ namespace ExtUI {
     // into buff.
 
     // Example:
-//    static_assert(sizeof(Dgus.lcd_info) <= ExtUI::eeprom_data_size);
+    //    static_assert(sizeof(Dgus.lcd_info) <= ExtUI::eeprom_data_size);
     memcpy(buff, &Dgus.lcd_info, sizeof(Dgus.lcd_info));
   }
 
@@ -99,15 +101,15 @@ namespace ExtUI {
     // from buff
 
     // Example:
-//    static_assert(sizeof(Dgus.lcd_info) <= ExtUI::eeprom_data_size);
+    //    static_assert(sizeof(Dgus.lcd_info) <= ExtUI::eeprom_data_size);
     memcpy(&Dgus.lcd_info, buff, sizeof(Dgus.lcd_info));
     memcpy(&Dgus.lcd_info_back, buff, sizeof(Dgus.lcd_info_back));
   }
 
-//  void onConfigurationStoreWritten(bool success) {
-//    // Called after the entire EEPROM has been written,
-//    // whether successful or not.
-//  }
+  //  void onConfigurationStoreWritten(bool success) {
+  //    // Called after the entire EEPROM has been written,
+  //    // whether successful or not.
+  //  }
 
   void onConfigurationStoreRead(bool success) {
     // Called after the entire EEPROM has been read,
@@ -126,31 +128,35 @@ namespace ExtUI {
 
   void onPostprocessSettings() {
     // Called after loading or resetting stored settings
+//    Dgus.ParamInit();
   }
 
-#if HAS_LEVELING
+  #if HAS_LEVELING
 
-  void onLevelingStart() {}
+  void onLevelingStart() { Dgus.LevelingStart(); }
 
-  void onLevelingDone() {}
+  void onLevelingDone() { Dgus.LevelingDone(); }
 
-#endif
+  #endif
 
-#if HAS_MESH
+  #if HAS_MESH
 
   void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval) {
     // Called when any mesh points are updated
-    //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
+    // SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
   }
 
-  void onMeshUpdate(const int8_t xpos, const int8_t ypos, const ExtUI::probe_state_t state) {
+  void onMeshUpdate(const int8_t xpos, const int8_t ypos,
+                    const ExtUI::probe_state_t state) {
     // Called to indicate a special condition
-    //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
+    // SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:",
+    // state);
+    Dgus.MeshUpdate(xpos, ypos, state);
   }
 
-#endif
+  #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY)
+  #if ENABLED(POWER_LOSS_RECOVERY)
 
   void onSetPowerLoss(const bool onoff) {
     // Called when power-loss is enabled/disabled
@@ -161,19 +167,19 @@ namespace ExtUI {
 
   void onPowerLossResume() { Dgus.PowerLossRecovery(); }
 
-#endif
+  #endif
 
-#if HAS_PID_HEATING
+  #if HAS_PID_HEATING
 
   void onPidTuning(const result_t rst) {
     // Called for temperature PID tuning result
   }
 
-#endif
+  #endif
 
   void onSteppersDisabled() {}
 
   void onSteppersEnabled() {}
-}
+} // namespace ExtUI
 
 #endif // ANYCUBIC_LCD_KOBRA

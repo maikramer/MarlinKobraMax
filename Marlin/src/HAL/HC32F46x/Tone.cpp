@@ -1,15 +1,12 @@
 #include "Tone.h"
-#include "timers.h"
-#include "drivers/bsp_timer.h"
 #include "drivers/bsp_pwm.h"
+#include "drivers/bsp_timer.h"
+#include "timers.h"
 
-
-#define TIMRE_MAX_DURATION_MS   671
-
+#define TIMRE_MAX_DURATION_MS 671
 
 static volatile uint32_t duration_cnt = 0;
 static volatile uint16_t duration_spare = 0;
-
 
 void tone(uint8_t _pin, uint16_t frequency, uint32_t duration) {
   duration_cnt = duration / TIMRE_MAX_DURATION_MS;
@@ -23,10 +20,7 @@ void tone(uint8_t _pin, uint16_t frequency, uint32_t duration) {
   beep_pwm_set_frequency(frequency, 50);
 }
 
-
-void noTone(uint8_t _pin, bool destruct) {
-
-}
+void noTone(uint8_t _pin, bool destruct) {}
 
 HAL_TONE_TIMER_ISR() {
   if (duration_cnt) {
@@ -39,4 +33,3 @@ HAL_TONE_TIMER_ISR() {
     timer01B_disable();
   }
 }
-

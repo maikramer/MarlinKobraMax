@@ -31,90 +31,103 @@
 #pragma once
 #include "../../../inc/MarlinConfigPre.h"
 
-#define ACDEBUGLEVEL 0
+#ifndef ACDEBUGLEVEL
+  #define ACDEBUGLEVEL 0
+#endif
 
 #if ACDEBUGLEVEL
-  // Bit-masks for selective debug:
-  enum ACDebugMask : uint8_t {
-    AC_INFO   =  1,
-    AC_ACTION =  2,
-    AC_FILE   =  4,
-    AC_PANEL  =  8,
-    AC_MARLIN = 16,
-    AC_SOME   = 32,
-    AC_ALL    = 64
-  };
-  #define ACDEBUG(mask) ( ((mask) & ACDEBUGLEVEL) == mask )  // Debug flag macro
+// Bit-masks for selective debug:
+enum ACDebugMask : uint8_t {
+  AC_INFO = 1,
+  AC_ACTION = 2,
+  AC_FILE = 4,
+  AC_PANEL = 8,
+  AC_MARLIN = 16,
+  AC_SOME = 32,
+  AC_ALL = 64
+};
+  #define ACDEBUG(mask) (((mask)&ACDEBUGLEVEL) == mask) // Debug flag macro
 #else
   #define ACDEBUG(mask) false
 #endif
 
-#define TFTSer LCD_SERIAL                    // Serial interface for TFT panel now uses marlinserial
-#define MAX_FOLDER_DEPTH                4    // Limit folder depth TFT has a limit for the file path
-#define MAX_CMND_LEN                   16 * MAX_FOLDER_DEPTH // Maximum Length for a Panel command
-#define MAX_PATH_LEN                   16 * MAX_FOLDER_DEPTH // Maximum number of characters in a SD file path
+#define TFTSer                                                                 \
+  LCD_SERIAL // Serial interface for TFT panel now uses marlinserial
+#define MAX_FOLDER_DEPTH                                                       \
+  4 // Limit folder depth TFT has a limit for the file path
+#define MAX_CMND_LEN 16 * MAX_FOLDER_DEPTH // Maximum Length for a Panel command
+#define MAX_PATH_LEN                                                           \
+  16 * MAX_FOLDER_DEPTH // Maximum number of characters in a SD file path
 
-#define AC_HEATER_FAULT_VALIDATION_TIME 5    // number of 1/2 second loops before signalling a heater fault
-#define AC_LOWEST_MESHPOINT_VAL        Z_PROBE_LOW_POINT // The lowest value you can set for a single mesh point offset
+#define AC_HEATER_FAULT_VALIDATION_TIME                                        \
+  5 // number of 1/2 second loops before signalling a heater fault
+#define AC_LOWEST_MESHPOINT_VAL                                                \
+  Z_PROBE_LOW_POINT // The lowest value you can set for a single mesh point
+                    // offset
 
- // TFT panel commands
-#define  AC_msg_sd_card_inserted       PSTR("J00")
-#define  AC_msg_sd_card_removed        PSTR("J01")
-#define  AC_msg_no_sd_card             PSTR("J02")
-#define  AC_msg_usb_connected          PSTR("J03")
-#define  AC_msg_print_from_sd_card     PSTR("J04")
-#define  AC_msg_pause                  PSTR("J05")
-#define  AC_msg_nozzle_heating         PSTR("J06")
-#define  AC_msg_nozzle_heating_done    PSTR("J07")
-#define  AC_msg_bed_heating            PSTR("J08")
-#define  AC_msg_bed_heating_done       PSTR("J09")
-#define  AC_msg_nozzle_temp_abnormal   PSTR("J10")
-#define  AC_msg_kill_lcd               PSTR("J11")
-#define  AC_msg_ready                  PSTR("J12")
-#define  AC_msg_low_nozzle_temp        PSTR("J13")
-#define  AC_msg_print_complete         PSTR("J14")
-#define  AC_msg_filament_out_alert     PSTR("J15")
-#define  AC_msg_stop                   PSTR("J16")
-#define  AC_msg_main_board_has_reset   PSTR("J17")
-#define  AC_msg_paused                 PSTR("J18")
-#define  AC_msg_j19_unknown            PSTR("J19")
-#define  AC_msg_sd_file_open_success   PSTR("J20")
-#define  AC_msg_sd_file_open_failed    PSTR("J21")
-#define  AC_msg_level_monitor_finished PSTR("J22")
-#define  AC_msg_filament_out_block     PSTR("J23")
-#define  AC_msg_probing_not_allowed    PSTR("J24")
-#define  AC_msg_probing_complete       PSTR("J25")
-#define  AC_msg_start_probing          PSTR("J26")
-#define  AC_msg_version                PSTR("J27")
-#define  AC_msg_bed_temp_abnormal      PSTR("J28")
+// TFT panel commands
+#define AC_msg_sd_card_inserted PSTR("J00")
+#define AC_msg_sd_card_removed PSTR("J01")
+#define AC_msg_no_sd_card PSTR("J02")
+#define AC_msg_usb_connected PSTR("J03")
+#define AC_msg_print_from_sd_card PSTR("J04")
+#define AC_msg_pause PSTR("J05")
+#define AC_msg_nozzle_heating PSTR("J06")
+#define AC_msg_nozzle_heating_done PSTR("J07")
+#define AC_msg_bed_heating PSTR("J08")
+#define AC_msg_bed_heating_done PSTR("J09")
+#define AC_msg_nozzle_temp_abnormal PSTR("J10")
+#define AC_msg_kill_lcd PSTR("J11")
+#define AC_msg_ready PSTR("J12")
+#define AC_msg_low_nozzle_temp PSTR("J13")
+#define AC_msg_print_complete PSTR("J14")
+#define AC_msg_filament_out_alert PSTR("J15")
+#define AC_msg_stop PSTR("J16")
+#define AC_msg_main_board_has_reset PSTR("J17")
+#define AC_msg_paused PSTR("J18")
+#define AC_msg_j19_unknown PSTR("J19")
+#define AC_msg_sd_file_open_success PSTR("J20")
+#define AC_msg_sd_file_open_failed PSTR("J21")
+#define AC_msg_level_monitor_finished PSTR("J22")
+#define AC_msg_filament_out_block PSTR("J23")
+#define AC_msg_probing_not_allowed PSTR("J24")
+#define AC_msg_probing_complete PSTR("J25")
+#define AC_msg_start_probing PSTR("J26")
+#define AC_msg_version PSTR("J27")
+#define AC_msg_bed_temp_abnormal PSTR("J28")
 
-#define MARLIN_msg_probing_point       PSTR("Probing Point ")
-#define MARLIN_msg_start_probing       PSTR("Probing Point 1/25")
-#define MARLIN_msg_probing_failed      PSTR("Probing Failed")
-#define MARLIN_msg_ready               PSTR(" Ready.")
-#define MARLIN_msg_print_paused        PSTR("Print Paused")
-#define MARLIN_msg_print_aborted       PSTR("Print Aborted")
-#define MARLIN_msg_extruder_heating    PSTR("E Heating...")
-#define MARLIN_msg_bed_heating         PSTR("Bed Heating...")
+#define MARLIN_msg_probing_point PSTR("Probing Point ")
+#define MARLIN_msg_start_probing PSTR("Probing Point 1/25")
+#define MARLIN_msg_probing_failed PSTR(STR_ERR_PROBING_FAILED)
+#define MARLIN_msg_ready PSTR(" Ready.")
+#define MARLIN_msg_print_paused PSTR("Print Paused")
+#define MARLIN_msg_print_aborted PSTR("Print Aborted")
+#define MARLIN_msg_extruder_heating PSTR("E Heating...")
+#define MARLIN_msg_bed_heating PSTR("Bed Heating...")
 #define MARLIN_msg_probe_preheat_start PSTR("Probe preheat start")
-#define MARLIN_msg_probe_preheat_stop  PSTR("Probe preheat stop")
+#define MARLIN_msg_probe_preheat_stop PSTR("Probe preheat stop")
 
+#define MARLIN_msg_nozzle_parked PSTR("Nozzle Parked")
+#define MARLIN_msg_heater_timeout PSTR("Heater Timeout")
+#define MARLIN_msg_reheating PSTR("Reheating...")
+#define MARLIN_msg_reheat_done PSTR("Reheat finished.")
+#define MARLIN_msg_filament_purging PSTR("Filament Purging...")
+#define MARLIN_msg_media_removed PSTR("Media Removed")
+#define MARLIN_msg_special_pause PSTR("PB")
+#define AC_cmnd_auto_unload_filament PSTR("M701") // Use Marlin unload routine
+#define AC_cmnd_auto_load_filament                                             \
+  PSTR("M702 M0 PB") // Use Marlin load routing then pause for user to clean
+                     // nozzle
 
-#define MARLIN_msg_nozzle_parked       PSTR("Nozzle Parked")
-#define MARLIN_msg_heater_timeout      PSTR("Heater Timeout")
-#define MARLIN_msg_reheating           PSTR("Reheating...")
-#define MARLIN_msg_reheat_done         PSTR("Reheat finished.")
-#define MARLIN_msg_filament_purging    PSTR("Filament Purging...")
-#define MARLIN_msg_media_removed       PSTR("Media Removed")
-#define MARLIN_msg_special_pause       PSTR("PB")
-#define AC_cmnd_auto_unload_filament   PSTR("M701")                    // Use Marlin unload routine
-#define AC_cmnd_auto_load_filament     PSTR("M702 M0 PB")              // Use Marlin load routing then pause for user to clean nozzle
-
-#define AC_cmnd_manual_load_filament   PSTR("M83\nG1 E50 F300\nM82")   // replace the manual panel commands with something a little faster
+#define AC_cmnd_manual_load_filament                                           \
+  PSTR("M83\nG1 E50 F300\nM82") // replace the manual panel commands with
+                                // something a little faster
 #define AC_cmnd_manual_unload_filament PSTR("M83\nG1 E-60 F900\nM82")
 #define AC_cmnd_manual_unload_filament_first_in PSTR("M83\nG1 E10 F300\nM82")
-#define AC_cmnd_enable_levelling       PSTR("M420 S1 V1")
-#define AC_cmnd_power_loss_recovery    PSTR("G28 R5 X Y\nG28 Z")       // Lift, home X and Y then home Z when in 'safe' position
+#define AC_cmnd_enable_levelling PSTR("M420 S1 V1")
+#define AC_cmnd_power_loss_recovery                                            \
+  PSTR("G28 R5 X Y\nG28 Z") // Lift, home X and Y then home Z when in 'safe'
+                            // position
 
 namespace Anycubic {
   enum heater_state_t : uint8_t {
@@ -158,4 +171,4 @@ namespace Anycubic {
     AC_menu_change_to_file,
     AC_menu_change_to_command
   };
-}
+} // namespace Anycubic

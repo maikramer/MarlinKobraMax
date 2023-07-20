@@ -32,24 +32,25 @@
 
 #ifdef TARGET_HC32F46x
 
-#include "../../inc/MarlinConfig.h"
-#ifdef USE_SPI
-#warning "'HAL_SPI' has not been tested to work as expected. Proceed at your own risk"
+  #include "../../inc/MarlinConfig.h"
+  #ifdef USE_SPI
+    #warning                                                                   \
+        "'HAL_SPI' has not been tested to work as expected. Proceed at your own risk"
 
-#include <SPI.h>
+    #include <SPI.h>
 
-// ------------------------
-// Public functions
-// ------------------------
+  // ------------------------
+  // Public functions
+  // ------------------------
 
-#if ENABLED(SOFTWARE_SPI)
+    #if ENABLED(SOFTWARE_SPI)
 
-// ------------------------
-// Software SPI
-// ------------------------
-#error "Software SPI not supported for HC32F46x. Use hardware SPI."
+      // ------------------------
+      // Software SPI
+      // ------------------------
+      #error "Software SPI not supported for HC32F46x. Use hardware SPI."
 
-#else
+    #else
 
 // ------------------------
 // Hardware SPI
@@ -64,38 +65,37 @@
  *
  * @return Nothing
  *
- * @details Only configures SS pin since libmaple creates and initialize the SPI object
+ * @details Only configures SS pin since libmaple creates and initialize the SPI
+ * object
  */
-void spiBegin()
-{
-#if PIN_EXISTS(SS)
+void spiBegin() {
+      #if PIN_EXISTS(SS)
   OUT_WRITE(SS_PIN, HIGH);
-#endif
+      #endif
 }
 
 /**
- * @brief  Initialize SPI port to required speed rate and transfer mode (MSB, SPI MODE 0)
+ * @brief  Initialize SPI port to required speed rate and transfer mode (MSB,
+ * SPI MODE 0)
  *
  * @param  spiRate Rate as declared in HAL.h (speed do not match AVR)
  * @return Nothing
  *
  * @details
  */
-void spiInit(uint8_t spiRate)
-{
-/**
- * STM32F1 APB2 = 72MHz, APB1 = 36MHz, max SPI speed of this MCU if 18Mhz
- * STM32F1 has 3 SPI ports, SPI1 in APB2, SPI2/SPI3 in APB1
- * so the minimum prescale of SPI1 is DIV4, SPI2/SPI3 is DIV2
- */
-#if SPI_DEVICE == 1
-#define SPI_CLOCK_MAX SPI_CLOCK_DIV4
-#else
-#define SPI_CLOCK_MAX SPI_CLOCK_DIV2
-#endif
+void spiInit(uint8_t spiRate) {
+      /**
+       * STM32F1 APB2 = 72MHz, APB1 = 36MHz, max SPI speed of this MCU if 18Mhz
+       * STM32F1 has 3 SPI ports, SPI1 in APB2, SPI2/SPI3 in APB1
+       * so the minimum prescale of SPI1 is DIV4, SPI2/SPI3 is DIV2
+       */
+      #if SPI_DEVICE == 1
+        #define SPI_CLOCK_MAX SPI_CLOCK_DIV4
+      #else
+        #define SPI_CLOCK_MAX SPI_CLOCK_DIV2
+      #endif
   uint8_t clock;
-  switch (spiRate)
-  {
+  switch (spiRate) {
   case SPI_FULL_SPEED:
     clock = SPI_CLOCK_MAX;
     break;
@@ -131,8 +131,7 @@ void spiInit(uint8_t spiRate)
  *
  * @details
  */
-uint8_t spiRec()
-{
+uint8_t spiRec() {
   uint8_t returnByte = SPI.transfer(ff);
   return returnByte;
 }
@@ -146,8 +145,7 @@ uint8_t spiRec()
  *
  * @details Uses DMA
  */
-void spiRead(uint8_t *buf, uint16_t nbyte)
-{
+void spiRead(uint8_t *buf, uint16_t nbyte) {
   SPI.dmaTransfer(0, const_cast<uint8_t *>(buf), nbyte);
 }
 
@@ -158,10 +156,7 @@ void spiRead(uint8_t *buf, uint16_t nbyte)
  *
  * @details
  */
-void spiSend(uint8_t b)
-{
-  SPI.send(b);
-}
+void spiSend(uint8_t b) { SPI.send(b); }
 
 /**
  * @brief  Write token and then write from 512 byte buffer to SPI (for SD card)
@@ -171,13 +166,12 @@ void spiSend(uint8_t b)
  *
  * @details Use DMA
  */
-void spiSendBlock(uint8_t token, const uint8_t *buf)
-{
+void spiSendBlock(uint8_t token, const uint8_t *buf) {
   SPI.send(token);
   SPI.dmaSend(const_cast<uint8_t *>(buf), 512);
 }
 
-#if ENABLED(SPI_EEPROM)
+      #if ENABLED(SPI_EEPROM)
 
 // Read single byte from specified SPI channel
 uint8_t spiRec(uint32_t chan) { return SPI.transfer(ff); }
@@ -186,14 +180,13 @@ uint8_t spiRec(uint32_t chan) { return SPI.transfer(ff); }
 void spiSend(uint32_t chan, byte b) { SPI.send(b); }
 
 // Write buffer to specified SPI channel
-void spiSend(uint32_t chan, const uint8_t *buf, size_t n)
-{
+void spiSend(uint32_t chan, const uint8_t *buf, size_t n) {
   for (size_t p = 0; p < n; p++)
     spiSend(chan, buf[p]);
 }
 
-#endif // SPI_EEPROM
+      #endif // SPI_EEPROM
 
-#endif // SOFTWARE_SPI
-#endif
+    #endif // SOFTWARE_SPI
+  #endif
 #endif // TARGET_HC32F46x

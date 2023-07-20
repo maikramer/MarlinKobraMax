@@ -37,18 +37,18 @@
 
 #if ENABLED(ANYCUBIC_LCD_KOBRA)
 
-#include "dgus_FileNavigator.h"
-#include "dgus_tft.h"
+  #include "dgus_FileNavigator.h"
+  #include "dgus_tft.h"
 
 using namespace ExtUI;
 
 namespace Anycubic {
 
-  FileList  FileNavigator::filelist;                          // Instance of the Marlin file API
-  char      FileNavigator::currentfoldername[MAX_PATH_LEN];   // Current folder path
-  uint16_t  FileNavigator::lastindex;
-  uint8_t   FileNavigator::folderdepth;
-  uint16_t  FileNavigator::currentindex;                      // override the panel request
+  FileList FileNavigator::filelist; // Instance of the Marlin file API
+  char FileNavigator::currentfoldername[MAX_PATH_LEN]; // Current folder path
+  uint16_t FileNavigator::lastindex;
+  uint8_t FileNavigator::folderdepth;
+  uint16_t FileNavigator::currentindex; // override the panel request
 
   FileNavigator filenavigator;
 
@@ -60,7 +60,8 @@ namespace Anycubic {
     currentindex = 0;
     lastindex = 0;
     // Start at root folder
-    while (!filelist.isAtRootDir()) filelist.upDir();
+    while (!filelist.isAtRootDir())
+      filelist.upDir();
     refresh();
   }
 
@@ -68,12 +69,14 @@ namespace Anycubic {
 
   void FileNavigator::getFiles(uint16_t index) {
     uint8_t files = 5;
-    if (index == 0) currentindex = 0;
+    if (index == 0)
+      currentindex = 0;
 
     // Each time we change folder we reset the file index to 0 and keep track
     // of the current position as the TFT panel isnt aware of folders trees.
     if (index > 0) {
-//      --currentindex; // go back a file to take account off the .. we added to the root.
+      //      --currentindex; // go back a file to take account off the .. we
+      //      added to the root.
       if (index > lastindex)
         currentindex += files;
       else
@@ -81,31 +84,36 @@ namespace Anycubic {
     }
     lastindex = index;
 
-#if ACDEBUG(AC_FILE)
-    SERIAL_ECHOLNPGM("index=", index, " currentindex=", currentindex, " lastindex=", lastindex);
-#endif
+  #if ACDEBUG(AC_FILE)
+    SERIAL_ECHOLNPGM("index=", index, " currentindex=", currentindex,
+                     " lastindex=", lastindex);
+  #endif
 
     uint8_t file_num = 0;
     for (uint16_t _seek = currentindex; _seek < currentindex + files; _seek++) {
 
-#if ACDEBUG(AC_FILE)
-      SERIAL_ECHOLNPGM("_seek: ", _seek, " currentindex: ", currentindex, " files: ", files);
-#endif
+  #if ACDEBUG(AC_FILE)
+      SERIAL_ECHOLNPGM("_seek: ", _seek, " currentindex: ", currentindex,
+                       " files: ", files);
+  #endif
 
       if (filelist.seek(_seek)) {
-//        sendFile();
+        //        sendFile();
 
-        DgusTFT::SendTxtToTFT(filelist.longFilename(), TXT_FILE_0 + file_num * 0x30);
+        DgusTFT::SendTxtToTFT(filelist.longFilename(),
+                              TXT_FILE_0 + file_num * 0x30);
 
-#if ACDEBUG(AC_FILE)
-        SERIAL_ECHOLNPGM("seek: ", _seek, " '", filelist.longFilename(), "' '", currentfoldername, "", filelist.shortFilename(), "'\n");
-#endif
+  #if ACDEBUG(AC_FILE)
+        SERIAL_ECHOLNPGM("seek: ", _seek, " '", filelist.longFilename(), "' '",
+                         currentfoldername, "", filelist.shortFilename(),
+                         "'\n");
+  #endif
 
       } else {
 
-#if ACDEBUG(AC_FILE)
+  #if ACDEBUG(AC_FILE)
         SERIAL_ECHOLNPGM("over seek: ", _seek);
-#endif
+  #endif
 
         DgusTFT::SendTxtToTFT("\0", TXT_FILE_0 + file_num * 0x30);
       }
@@ -120,14 +128,14 @@ namespace Anycubic {
     // Permitted special characters in file name -_*#~
     // Panel can display 22 characters per line
     if (filelist.isDir()) {
-      //TFTSer.print(currentfoldername);
-//      TFTSer.println(filelist.shortFilename());
-//      TFTSer.print(filelist.shortFilename());
-//      TFTSer.println("/");
+      // TFTSer.print(currentfoldername);
+      //      TFTSer.println(filelist.shortFilename());
+      //      TFTSer.print(filelist.shortFilename());
+      //      TFTSer.println("/");
 
-//        send_to_TFT_txt(filelist.shortFilename(), TXT_FILE_0);
+      //        send_to_TFT_txt(filelist.shortFilename(), TXT_FILE_0);
     } else {
-#if 0
+  #if 0
       // Logical Name
       TFTSer.print("/");
       if (folderdepth > 0) TFTSer.print(currentfoldername);
@@ -136,17 +144,18 @@ namespace Anycubic {
 
       // Display Name
       TFTSer.println(filelist.longFilename());
-#endif
+  #endif
 
       DgusTFT::SendTxtToTFT(filelist.longFilename(), TXT_FILE_0);
     }
   }
 
   void FileNavigator::changeDIR(char *folder) {
-#if ACDEBUG(AC_FILE)
+  #if ACDEBUG(AC_FILE)
     SERIAL_ECHOLNPGM("currentfolder: ", currentfoldername, "  New: ", folder);
-#endif
-    if (folderdepth >= MAX_FOLDER_DEPTH) return; // limit the folder depth
+  #endif
+    if (folderdepth >= MAX_FOLDER_DEPTH)
+      return; // limit the folder depth
     strcat(currentfoldername, folder);
     strcat(currentfoldername, "/");
     filelist.changeDir(folder);
@@ -171,16 +180,15 @@ namespace Anycubic {
 
       *(pos + 1) = '\0';
     }
-#if ACDEBUG(AC_FILE)
-    SERIAL_ECHOLNPGM("depth: ", folderdepth, " currentfoldername: ", currentfoldername);
-#endif
+  #if ACDEBUG(AC_FILE)
+    SERIAL_ECHOLNPGM("depth: ", folderdepth,
+                     " currentfoldername: ", currentfoldername);
+  #endif
   }
 
   char *FileNavigator::getCurrentFolderName() { return currentfoldername; }
 
-  uint16_t FileNavigator::getFileNum() {
-    return filelist.count();
-  }
-}
+  uint16_t FileNavigator::getFileNum() { return filelist.count(); }
+} // namespace Anycubic
 
 #endif // ANYCUBIC_LCD_KOBRA

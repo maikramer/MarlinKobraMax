@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "fastio.h"
 #include "../../inc/MarlinConfig.h"
+#include "fastio.h"
 
 // allow pins with potentially unsafe FuncSel
 // #define ALLOW_UNSAFE_FUNCTION_PINS
@@ -28,7 +28,7 @@
 // Translation of routines & variables used by pinsDebug.h
 //
 #ifndef BOARD_NR_GPIO_PINS
-#error "Expected BOARD_NR_GPIO_PINS not found"
+  #error "Expected BOARD_NR_GPIO_PINS not found"
 #endif
 
 #define NUM_DIGITAL_PINS BOARD_NR_GPIO_PINS
@@ -37,39 +37,39 @@
 #define GET_ARRAY_PIN(p) pin_t(pin_array[p].pin)
 #define pwm_status(pin) PWM_PIN(pin)
 #define digitalRead_mod(p) extDigitalRead(p)
-#define PRINT_PIN(p)                                  \
-    do                                                \
-    {                                                 \
-        sprintf_P(buffer, PSTR("%3hd "), int16_t(p)); \
-        SERIAL_ECHO(buffer);                          \
-    } while (0)
-#define PRINT_PIN_ANALOG(p)                                                   \
-    do                                                                        \
-    {                                                                         \
-        sprintf_P(buffer, PSTR(" (A%2d)  "), DIGITAL_PIN_TO_ANALOG_PIN(pin)); \
-        SERIAL_ECHO(buffer);                                                  \
-    } while (0)
+#define PRINT_PIN(p)                                                           \
+  do {                                                                         \
+    sprintf_P(buffer, PSTR("%3hd "), int16_t(p));                              \
+    SERIAL_ECHO(buffer);                                                       \
+  } while (0)
+#define PRINT_PIN_ANALOG(p)                                                    \
+  do {                                                                         \
+    sprintf_P(buffer, PSTR(" (A%2d)  "), DIGITAL_PIN_TO_ANALOG_PIN(pin));      \
+    SERIAL_ECHO(buffer);                                                       \
+  } while (0)
 #define PRINT_PORT(p) print_port(p)
-#define PRINT_ARRAY_NAME(x)                                                              \
-    do                                                                                   \
-    {                                                                                    \
-        sprintf_P(buffer, PSTR("%-" STRINGIFY(MAX_NAME_LENGTH) "s"), pin_array[x].name); \
-        SERIAL_ECHO(buffer);                                                             \
-    } while (0)
-#define MULTI_NAME_PAD 21 // space needed to be pretty if not first name assigned to a pin
+#define PRINT_ARRAY_NAME(x)                                                    \
+  do {                                                                         \
+    sprintf_P(buffer, PSTR("%-" STRINGIFY(MAX_NAME_LENGTH) "s"),               \
+              pin_array[x].name);                                              \
+    SERIAL_ECHO(buffer);                                                       \
+  } while (0)
+#define MULTI_NAME_PAD                                                         \
+  21 // space needed to be pretty if not first name assigned to a pin
 
 //
-// pins that will cause a hang / reset / disconnect in M43 Toggle and Watch utils
+// pins that will cause a hang / reset / disconnect in M43 Toggle and Watch
+// utils
 //
 #ifndef M43_NEVER_TOUCH
-// do not touch any of the following pins:
-// - host serial pins, and
-// - pins related to the oscillator
-#define IS_HOST_USART_PIN(Q) (Q == BOARD_USART2_TX_PIN || Q == BOARD_USART2_RX_PIN)
-#define IS_OSC_PIN(Q) (Q == PH0 || Q == PH1 || Q == PH2)
+  // do not touch any of the following pins:
+  // - host serial pins, and
+  // - pins related to the oscillator
+  #define IS_HOST_USART_PIN(Q)                                                 \
+    (Q == BOARD_USART2_TX_PIN || Q == BOARD_USART2_RX_PIN)
+  #define IS_OSC_PIN(Q) (Q == PH0 || Q == PH1 || Q == PH2)
 
-#define M43_NEVER_TOUCH(Q) ( \
-    IS_HOST_USART_PIN(Q) || IS_OSC_PIN(Q))
+  #define M43_NEVER_TOUCH(Q) (IS_HOST_USART_PIN(Q) || IS_OSC_PIN(Q))
 #endif
 
 // static int8_t get_pin_mode(pin_t pin) {
@@ -93,18 +93,14 @@ static bool IS_ANALOG(pin_t pin) {
   return false;
 }
 
-static WiringPinMode GET_PINMODE(const pin_t pin) {
-  return getPinMode(pin);
-}
+static WiringPinMode GET_PINMODE(const pin_t pin) { return getPinMode(pin); }
 
 static bool GET_ARRAY_IS_DIGITAL(const int16_t array_pin) {
   const pin_t pin = GET_ARRAY_PIN(array_pin);
   return (!IS_ANALOG(pin));
 }
 
-static void pwm_details(const pin_t pin) {
-
-}
+static void pwm_details(const pin_t pin) {}
 
 static void print_port(pin_t pin) {
   const char port = 'A' + char(pin >> 4); // pin div 16
