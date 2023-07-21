@@ -45,7 +45,7 @@
 #define PAGE_STATUS1 (123 + PAGE_OFFSET) // show resume
 #define PAGE_STATUS2 (124 + PAGE_OFFSET) // show pause
 #define PAGE_ADJUST (125 + PAGE_OFFSET)
-#define PAGE_KEYBPARD (126 + PAGE_OFFSET)
+#define PAGE_KEYBOARD (6 + PAGE_OFFSET)
 #define PAGE_TOOL (127 + PAGE_OFFSET)
 #define PAGE_MOVE (128 + PAGE_OFFSET)
 #define PAGE_TEMP (129 + PAGE_OFFSET)
@@ -327,35 +327,6 @@ namespace Anycubic {
   } lcd_info_t;
 
   class DgusTFT {
-    static printer_state_t printer_state;
-    static paused_state_t pause_state;
-    static heater_state_t hotend_state;
-    static heater_state_t hotbed_state;
-    static xy_uint8_t selectedmeshpoint;
-    static char panel_command[MAX_CMND_LEN];
-    static uint8_t command_len;
-    static char selectedfile[MAX_PATH_LEN];
-    static float live_Zoffset;
-    static file_menu_t file_menu;
-    static bool data_received;
-    static uint8_t data_buf[64];
-    static uint8_t data_index;
-    static uint32_t page_index_last;
-    static uint32_t page_index_last_2;
-    static uint8_t message_index;
-    static uint8_t pop_up_index;
-    static uint32_t key_index;
-    static uint32_t key_value;
-    static uint16_t filenumber;
-    static uint16_t filepage;
-    static uint8_t lcd_txtbox_index;
-    static uint8_t lcd_txtbox_page;
-    static uint16_t change_color_index;
-    static uint8_t TFTpausingFlag;
-    static uint8_t TFTStatusFlag;
-    static uint8_t TFTresumingflag;
-    static uint8_t ready;
-
   public:
     DgusTFT();
 
@@ -394,76 +365,87 @@ namespace Anycubic {
     void LevelingDone();
 
     void MeshUpdate(const int8_t xpos, const int8_t ypos,
-                             const ExtUI::probe_state_t state);
+                    const ExtUI::probe_state_t state);
 
     typedef void (*p_fun)(void);
 
-    static void page1_handle(void);
-
-    static void page2_handle(void);
-
-    static void page3_handle(void);
-
-    static void page4_handle(void);
-
-    static void page5_handle(void);
-
-    static void page6_handle(void);
-
-    static void page7_handle(void); // tool
-    static void page8_handle(void);
-
-    static void page9_handle(void);
-
-    static void page10_handle(void); // fan and print speed
-    static void page11_handle(void); // system
-    static void page12_handle(void);
-
-    static void page13_handle(void);
-
-    static void page14_handle(void);
-
-    static void page15_handle(void);
-
-    static void page16_handle(void);
-
-    static void page17_handle(void);
-
-    static void page18_handle(void);
-
-    static void page19_handle(void);
-
-    static void page20_handle(void);
-
-    static void page21_handle(void);
-
-    static void page22_handle(void);
-
-    static void page23_handle(void);
-
-    static void page24_handle(void);
-
-    static void page25_handle(void);
-
-    static void page26_handle(void);
-
-    static void page27_handle(void);
-
-    static void page28_handle(void);
-
-    static void page29_handle(void);
-
-    static void page30_handle(void);
-
-    static void page31_handle(void);
-
-    static void page32_handle(void);
-
-    static void page33_handle(void);
-
-    static void page34_handle(void);
+    static void page6_handle(void) {}
 
     static void page115_handle(void);
+
+    static void page121_handle(void);
+
+    static void page122_handle(void);
+
+    static void Page123_124_Return();
+
+    static void Page123_124_Stop();
+
+    static void Page123_124_Settings(uint16_t &feedrate_last);
+
+    static void Page123_124_End(millis_t &flash_time, uint8_t &progress_last,
+                                uint16_t &feedrate_last);
+
+    static void page123_handle(void);
+
+    static void page124_handle(void);
+
+    static void page125_handle(void);
+
+    static void page126_handle(void);
+
+    static void page127_handle(void); // tool
+    static void page128_handle(void);
+
+    static void page129_handle(void);
+
+    static void page130_handle(void); // fan and print speed
+    static void page131_handle(void); // system
+    static void page132_handle(void);
+
+    static void page133_handle(void);
+
+    static void page134_handle(void);
+
+    static void page135_handle(void);
+
+    static void page136_handle(void);
+
+    static void page137_handle(void);
+
+    static void page138_handle(void);
+
+    static void page139_handle(void);
+
+    static void page140_handle(void);
+
+    static void page141_handle(void);
+
+    static void page142_handle(void);
+
+    static void page143_handle(void);
+
+    static void page144_handle(void);
+
+    static void page145_handle(void);
+
+    static void page146_handle(void);
+
+    static void page147_handle(void);
+
+    static void page148_handle(void);
+
+    static void page149_handle(void);
+
+    static void page150_handle(void);
+
+    static void page151_handle(void);
+
+    static void page152_handle(void);
+
+    static void page153_handle(void);
+
+    static void page154_handle(void);
 
     static void page170_handle(void);     // ENG Mute handler
     static void page173_handle(void);     // ENG power outage resume handler
@@ -529,13 +511,41 @@ namespace Anycubic {
 
     static void SendReadNumOfTxtToTFT(uint8_t number, uint32_t address);
 
-    static void ChangePageOfTFT(uint32_t page_index);
+    static void ChangePageOfTFT(uint32_t page_index, bool no_send = false);
 
     static void FakeChangePageOfTFT(uint32_t page_index);
 
     static void LcdAudioSet(ExtUI::audio_t audio);
 
   private:
+    static printer_state_t printer_state;
+    static paused_state_t pause_state;
+    static heater_state_t hotend_state;
+    static heater_state_t hotbed_state;
+    static xy_uint8_t selectedmeshpoint;
+    static char panel_command[MAX_CMND_LEN];
+    static uint8_t command_len;
+    static char selectedfile[MAX_PATH_LEN];
+    static float live_Zoffset;
+    static file_menu_t file_menu;
+    static bool data_received;
+    static uint8_t data_buf[64];
+    static uint8_t data_index;
+    static uint32_t page_index_last;
+    static uint32_t page_index_last_2;
+    static uint8_t message_index;
+    static uint8_t pop_up_index;
+    static uint32_t key_index;
+    static uint32_t key_value;
+    static uint16_t filenumber;
+    static uint16_t filepage;
+    static uint8_t lcd_txtbox_index;
+    static uint8_t lcd_txtbox_page;
+    static uint16_t change_color_index;
+    static uint8_t TFTpausingFlag;
+    static uint8_t TFTStatusFlag;
+    static uint8_t TFTresumingflag;
+    static uint8_t ready;
   };
 
   extern DgusTFT Dgus;
