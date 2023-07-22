@@ -41,11 +41,13 @@
   do {                                                                         \
     sprintf_P(buffer, PSTR("%3hd "), int16_t(p));                              \
     SERIAL_ECHO(buffer);                                                       \
+    delay(50);                                                                             \
   } while (0)
 #define PRINT_PIN_ANALOG(p)                                                    \
   do {                                                                         \
     sprintf_P(buffer, PSTR(" (A%2d)  "), DIGITAL_PIN_TO_ANALOG_PIN(pin));      \
     SERIAL_ECHO(buffer);                                                       \
+        delay(50);  \
   } while (0)
 #define PRINT_PORT(p) print_port(p)
 #define PRINT_ARRAY_NAME(x)                                                    \
@@ -53,6 +55,7 @@
     sprintf_P(buffer, PSTR("%-" STRINGIFY(MAX_NAME_LENGTH) "s"),               \
               pin_array[x].name);                                              \
     SERIAL_ECHO(buffer);                                                       \
+        delay(50);  \
   } while (0)
 #define MULTI_NAME_PAD                                                         \
   21 // space needed to be pretty if not first name assigned to a pin
