@@ -39,7 +39,11 @@ public:
 
   static void init() {
     #if NEED_CASE_LIGHT_PIN
-      if (pin_is_pwm()) SET_PWM(CASE_LIGHT_PIN); else SET_OUTPUT(CASE_LIGHT_PIN);
+      #if CASELIGHT_USES_BRIGHTNESS
+        SET_PWM(CASE_LIGHT_PIN);
+      #else
+        SET_OUTPUT(CASE_LIGHT_PIN);
+      #endif
     #endif
     update_brightness();
   }

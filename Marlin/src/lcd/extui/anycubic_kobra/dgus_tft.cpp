@@ -1573,8 +1573,8 @@ namespace Anycubic {
     }
     Page123_124_End(flash_time, progress_last, feedrate_last);
   }
-
-  void DgusTFT::page125_handle(void) // print settings
+  // Inside Print Settings
+  void DgusTFT::page125_handle(void)
   {
     char str_buf[10];
     float z_off;

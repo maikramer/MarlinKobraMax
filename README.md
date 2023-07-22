@@ -12,7 +12,8 @@ I've been working to bring the latest Marlin to the Kobra Max, the project is in
 ### What is not Working
 - Filament Sensor
 - Power Loss Recovery
-- Nozzle Light
+- Nozzle Light (CaseLight)
+- Some LCD Bugs Yet (Keypad not working, etc)
 - You Tell me
 
 # Warning
