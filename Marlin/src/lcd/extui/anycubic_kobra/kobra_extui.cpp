@@ -39,8 +39,6 @@ namespace ExtUI {
 
   void onStartup() { Dgus.Startup(); }
 
-  void onParamInit() { Dgus.ParamInit(); }
-
   void onIdle() { Dgus.IdleLoop(); }
 
   void onPrinterKilled(FSTR_P const error, FSTR_P const component) {
@@ -128,7 +126,6 @@ namespace ExtUI {
 
   void onPostprocessSettings() {
     // Called after loading or resetting stored settings
-//    Dgus.ParamInit();
   }
 
   #if HAS_LEVELING

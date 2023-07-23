@@ -121,6 +121,7 @@
 
 #define AUTO_LEVEL_TX_PIN                   PB7
 #define AUTO_LEVEL_RX_PIN                   PB6
+#define PROBE_TARE_PIN                      AUTO_LEVEL_TX_PIN
 
 //
 // SD Card

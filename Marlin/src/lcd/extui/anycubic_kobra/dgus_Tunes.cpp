@@ -44,13 +44,13 @@ namespace Anycubic {
 
   void PlayTune(uint8_t beeperPin, const uint16_t *tune, uint8_t speed = 1) {
     uint8_t pos = 1;
-    uint16_t wholenotelen = tune[0] / speed;
+    uint16_t wholeNoteLen = tune[0] / speed;
     do {
-      uint16_t freq = tune[pos];
-      uint16_t notelen = wholenotelen / tune[pos + 1];
+      //uint16_t freq = tune[pos];
+      uint16_t noteLen = wholeNoteLen / tune[pos + 1];
 
-      //::tone(beeperPin, freq, notelen);
-      ExtUI::delay_ms(notelen);
+      //::tone(beeperPin, freq, noteLen);
+      ExtUI::delay_ms(noteLen);
       pos += 2;
 
       if (pos >= MAX_TUNE_LENGTH)

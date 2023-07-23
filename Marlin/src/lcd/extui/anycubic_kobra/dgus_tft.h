@@ -42,20 +42,19 @@
 #define PAGE_OFFSET 0
 #define PAGE_MAIN (121 + PAGE_OFFSET)
 #define PAGE_FILE (122 + PAGE_OFFSET)
-#define PAGE_STATUS1 (123 + PAGE_OFFSET) // show resume
-#define PAGE_STATUS2 (124 + PAGE_OFFSET) // show pause
+#define PAGE_STATUS1 (123 + PAGE_OFFSET)  // show resume
+#define PAGE_STATUS2 (124 + PAGE_OFFSET)  // show pause
 #define PAGE_ADJUST (125 + PAGE_OFFSET)
 #define PAGE_KEYBOARD (6 + PAGE_OFFSET)
 #define PAGE_TOOL (127 + PAGE_OFFSET)
 #define PAGE_MOVE (128 + PAGE_OFFSET)
 #define PAGE_TEMP (129 + PAGE_OFFSET)
 #define PAGE_SPEED (130 + PAGE_OFFSET)
-#define PAGE_WIFI (132 + PAGE_OFFSET)
 #define PAGE_ABOUT (133 + PAGE_OFFSET)
 #define PAGE_RECORD (134 + PAGE_OFFSET)
 #define PAGE_PREPARE (135 + PAGE_OFFSET)
-#define PAGE_PreLEVEL (136 + PAGE_OFFSET)
-#define PAGE_LEVEL_ADVANCE (137 + PAGE_OFFSET)
+#define PAGE_LEVELING_SETTINGS (136 + PAGE_OFFSET)
+#define PAGE_Z_OFFSET (137 + PAGE_OFFSET)
 #define PAGE_PREHEAT (138 + PAGE_OFFSET)
 #define PAGE_FILAMENT (139 + PAGE_OFFSET)
 
@@ -104,6 +103,15 @@
 
 #define PAGE_PRINTING_SETTING (212 + PAGE_OFFSET)
 
+/****************** PopUps **************************/
+#define POPUP_T0_ERROR 10
+#define POPUP_FILAMENT_LACK 15
+#define POPUP_STOP_WAIT 16
+#define POPUP_FILAMENT_LACKING 23
+#define POPUP_PRINT_FINISH 24
+#define POPUP_LEVELING_DONE 25
+#define POPUP_NONE 100
+
 /****************** Lcd control **************************/
 #define REG_LCD_READY 0x0014
 
@@ -117,7 +125,7 @@
 // FILE TXT
 
 #define TXT_FILE_0 (0x2000 + 3 * 0x30)
-#define TXT_DISCRIBE_0 0x5000 // DISCRIBE ADDRESS
+#define TXT_DISCRIBE_0 0x5000  // DISCRIBE ADDRESS
 #define TXT_FILE_1 (0x2000 + 4 * 0x30)
 #define TXT_DISCRIBE_1 0x5030
 #define TXT_FILE_2 (0x2000 + 5 * 0x30)
@@ -132,7 +140,7 @@
 #define TXT_PRINT_SPEED 0x2000 + 9 * 0x30
 #define TXT_PRINT_TIME 0x2000 + 10 * 0x30
 #define TXT_PRINT_PROGRESS 0x2000 + 11 * 0x30
-#define TXT_PRINT_COMMENT 0x2000 + 12 * 0x30 // MEL_MOD malebuffy
+#define TXT_PRINT_COMMENT 0x2000 + 12 * 0x30  // MEL_MOD malebuffy
 
 // PRINT ADJUST TXT
 
@@ -240,7 +248,7 @@
 #define KEY_TOOL_TO_SPEED 4
 #define KEY_TOOL_LIGHT 5
 
-#define KEY_MOVE_TO_TOLL 1 // move page
+#define KEY_MOVE_TO_TOLL 1  // move page
 #define KEY_MOVE_X 2
 #define KEY_01 3
 #define KEY_MOVE_NX 4
@@ -258,7 +266,7 @@
 #define KEY_SPEED_HIGHT 16
 #define KEY_HOME_ALL 17
 
-#define KEY_TEMP_TO_TOOL 1 // Temperature setting page
+#define KEY_TEMP_TO_TOOL 1  // Temperature setting page
 #define KEY_BED_ADD 2
 #define KEY_BED_DEC 3
 #define KEY_HOTEND_ADD 4
@@ -266,14 +274,14 @@
 #define KEY_COOL 6
 #define KEY_TEMP_ENSURE 7
 
-#define KEY_SPEED_TO_TOOL 1 // speed setting page
+#define KEY_SPEED_TO_TOOL 1  // speed setting page
 #define KEY_FAN_SPEED_ADD 2
 #define KEY_FAN_SPEED_DEC 3
 #define KEY_PRINT_SPEED_ADD 4
 #define KEY_PRINT_SPEED_DEC 5
 #define KEY_SPEED_ENSURE 6
 
-#define KEY_PREPARE_TO_MAIN 1 // PREPARE PAGE TO MAIN
+#define KEY_PREPARE_TO_MAIN 1  // PREPARE PAGE TO MAIN
 #define KEY_PREPARE_TO_PreLEVE 2
 #define KEY_PreLEVE_TO_PREPARE 1
 #define KEY_PreLEVE_TO_LEVELING 2
@@ -317,7 +325,7 @@
 namespace ExtUI {
   enum language_t : uint8_t { ENG };
   enum audio_t : uint8_t { ON, OFF };
-} // namespace ExtUI
+}  // namespace ExtUI
 
 namespace Anycubic {
 
@@ -327,7 +335,7 @@ namespace Anycubic {
   } lcd_info_t;
 
   class DgusTFT {
-  public:
+   public:
     DgusTFT();
 
     static lcd_info_t lcd_info;
@@ -335,8 +343,6 @@ namespace Anycubic {
     static uint32_t page_index_now;
 
     void Startup();
-
-    void ParamInit();
 
     void IdleLoop();
 
@@ -390,22 +396,20 @@ namespace Anycubic {
 
     static void page124_handle(void);
 
+    static void page125_SaveAndBack(bool z_change);
     static void page125_handle(void);
 
     static void page126_handle(void);
 
-    static void page127_handle(void); // tool
+    static void page127_handle(void);  // tool
     static void page128_handle(void);
 
     static void page129_handle(void);
 
-    static void page130_handle(void); // fan and print speed
-    static void page131_handle(void); // system
-    static void page132_handle(void);
+    static void page130_handle(void);  // fan and print speed
+    static void page131_handle(void);  // system
 
     static void page133_handle(void);
-
-    static void page134_handle(void);
 
     static void page135_handle(void);
 
@@ -445,22 +449,15 @@ namespace Anycubic {
 
     static void page153_handle(void);
 
-    static void page154_handle(void);
-
-    static void page170_handle(void);     // ENG Mute handler
-    static void page173_handle(void);     // ENG power outage resume handler
-    static void page175_176_handle(void); // ENG probe preheating handler
+    static void page170_handle(void);      // ENG Mute handler
+    static void page173_handle(void);      // ENG power outage resume handler
+    static void page175_176_handle(void);  // ENG probe preheating handler
 
     static void page177_to_198_handle(void);
 
-    //      static void page178_to_181_190_to_193_handle(void);
     static void page199_to_200_handle(void);
 
     static void page201_handle(void);
-
-    static void page202_handle(void);
-
-    static void page203_handle(void);
 
     static void page204_handle(void);
 
@@ -472,10 +469,10 @@ namespace Anycubic {
 
     static void page211_212_handle(void);
 
-    static void page213_handle(void); // MEL_MOD printer stats page (213)
+    static void page213_handle(void);  // MEL_MOD printer stats page (213)
     static void pop_up_manager(void);
 
-    static void printerStatsToTFT(void); // MEL_MOD
+    static void printerStatsToTFT(void);  // MEL_MOD
 
     void SendtoTFT(PGM_P);
 
@@ -517,7 +514,7 @@ namespace Anycubic {
 
     static void LcdAudioSet(ExtUI::audio_t audio);
 
-  private:
+   private:
     static printer_state_t printer_state;
     static paused_state_t pause_state;
     static heater_state_t hotend_state;
@@ -546,8 +543,10 @@ namespace Anycubic {
     static uint8_t TFTStatusFlag;
     static uint8_t TFTresumingflag;
     static uint8_t ready;
+    static int16_t home_owner_page;
+    static bool is_auto_leveling;
   };
 
   extern DgusTFT Dgus;
 
-} // namespace Anycubic
+}  // namespace Anycubic
