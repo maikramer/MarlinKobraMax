@@ -10,9 +10,9 @@ I've been working to bring the latest Marlin to the Kobra Max, the project is in
 - Can be built with Platformio and Vs Code
 
 ### What is not Working
-- Filament Sensor
+- Resume from pause not working
+- Filament Sensor (Sensor is Working, but it's not resuming, probably related to prior problem)
 - Power Loss Recovery
-- Nozzle Light (CaseLight)
 - Some LCD Bugs Yet (Keypad not working, etc)
 - You Tell me
 
