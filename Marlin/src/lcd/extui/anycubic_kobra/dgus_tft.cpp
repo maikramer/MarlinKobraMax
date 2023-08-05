@@ -236,6 +236,9 @@ namespace Anycubic {
   }
 
   void DgusTFT::IdleLoop() {
+  #if ACDEBUG(AC_MARLIN)
+    static uint16_t pageNotFound = 0;
+  #endif
     if (ReadTFTCommand()) {
       ProcessPanelRequest();
       command_len = 0;
@@ -261,48 +264,68 @@ namespace Anycubic {
               (uint32_t)getTargetTemp_celsius(BED));
       SendTxtToTFT(str_buf, TXT_MAIN_BED);
     }
-    if (page_index_now == 115) {
-      page115_handle();
-    } else if (page_index_now == 153) {
-      page153_handle();
-    } else if (page_index_now == 170) {
-      page170_handle();
-    } else if (page_index_now == 173) {
-      page173_handle();
-    } else if (page_index_now == 175 || page_index_now == 176) {
-      page175_176_handle();
-    } else if (177 <= page_index_now && page_index_now <= 198) {
-  #if 0  // ACDEBUG(AC_MARLIN)
-            SERIAL_ECHOLNPGM("line: ", __LINE__);
-            SERIAL_ECHOLNPGM("func: ", page_index_now);
+    switch (page_index_now) {
+      case 115:
+        page115_handle();
+        break;
+      case 157 ... 159:
+      case 161 ... 169:
+        break;
+      case 170:
+        page170_handle();
+        break;
+      case 173:
+        page173_handle();
+        break;
+      case 174:
+        break;
+      case 175:
+      case 176:
+        page175_176_handle();
+        break;
+      case 189 ... 196:
+        break;
+      case 200:
+        page199_to_200_handle();
+        break;
+      case 204:
+        page204_handle();
+        break;
+      case 205:
+        page205_handle();
+        break;
+      case 206:
+        page206_handle();
+        break;
+      case 208:
+        break;
+      case 209:
+        page207_209_handle();
+        break;
+      case 210:
+        break;
+      case 212:
+        page211_212_handle();
+        break;
+      case 213:
+        page213_handle();
+        break;
+      case 214:
+        break;
+      case 120 ... 156:
+        fun_array[page_index_now - 1 - 120]();
+        break;
+      default:
+  #if ACDEBUG(AC_MARLIN)
+        if (pageNotFound != page_index_now) {
+          SERIAL_ECHOLN("LCD Function does not exist");
+          SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
+          SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
+          SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
+          pageNotFound = page_index_now;
+        }
   #endif
-      //      page177_to_198_handle();
-    } else if (199 == page_index_now || page_index_now == 200) {
-  #if 0  // ACDEBUG(AC_MARLIN)
-            SERIAL_ECHOLNPGM("line: ", __LINE__);
-            SERIAL_ECHOLNPGM("func: ", page_index_now);
-  #endif
-      page199_to_200_handle();
-    } else if (page_index_now == 201 || page_index_now == 204) {
-      page201_handle();
-
-    } else if (page_index_now == 202 || page_index_now == 205) {
-      page205_handle();
-
-    } else if (page_index_now == 203 || page_index_now == 206) {
-      page206_handle();
-
-    } else if (page_index_now == 207 || page_index_now == 209) {
-      page207_209_handle();
-
-    } else if (page_index_now == 211 || page_index_now == 212) {
-      page211_212_handle();
-
-    } else if (page_index_now == 213) {
-      page213_handle();
-
-    } else if (120 < page_index_now && page_index_now < 156) {
-      fun_array[page_index_now - 1 - 120]();
+        break;
     }
     pop_up_manager();
     key_value = 0;
@@ -320,7 +343,7 @@ namespace Anycubic {
     memcpy_P(component, component_p,
              textLength + 1);  // +1 for the null terminator
 
-    //    SendtoTFTLN(AC_msg_kill_lcd);
+  //    SendtoTFTLN(AC_msg_kill_lcd);
   #if ACDEBUG(AC_MARLIN)
     SERIAL_ECHOLNPGM("PrinterKilled()\nerror: ", err,
                      "\ncomponent: ", component);
@@ -470,7 +493,7 @@ namespace Anycubic {
   }
 
   void DgusTFT::ConfirmationRequest(const char *const msg) {
-    // M108 continue
+  // M108 continue
   #if ACDEBUG(AC_MARLIN)
     SERIAL_ECHOLNPGM("ConfirmationRequest() ", msg);
     SERIAL_ECHOLNPGM("printer_state:", printer_state);
@@ -986,7 +1009,7 @@ namespace Anycubic {
   }
 
   void DgusTFT::SendFileList(int8_t startindex) {
-    // Respond to panel request for 4 files starting at index
+  // Respond to panel request for 4 files starting at index
   #if ACDEBUG(AC_INFO)
     SERIAL_ECHOLNPGM("## SendFileList ## ", startindex);
   #endif
@@ -2543,8 +2566,8 @@ namespace Anycubic {
     }
   }
 
-  void DgusTFT::page175_176_handle(void)  // ENG probe preheating handler
-  {
+  // Probe Preheating
+  void DgusTFT::page175_176_handle(void) {
     static millis_t flash_time = 0;
     if (millis() < (flash_time + 500)) {
       return;
@@ -2557,68 +2580,7 @@ namespace Anycubic {
     }
   }
 
-  void DgusTFT::page177_to_198_handle(void) {
-    switch (key_value) {
-      case 1:  // return
-
-  #if ACDEBUG(AC_MARLIN)
-        SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
-        SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
-        SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
-  #endif
-
-        if ((PAGE_ABNORMAL_X_ENDSTOP <= page_index_now &&
-             page_index_now <= PAGE_ABNORMAL_Z_ENDSTOP)) {
-          if (PAGE_STATUS1 == page_index_last_2 ||
-              PAGE_STATUS2 == page_index_last_2 ||
-              PAGE_PRINT_FINISH == page_index_last) {
-            ChangePageOfTFT(PAGE_MAIN);
-          } else {
-            ChangePageOfTFT(page_index_last_2);
-          }
-
-        } else {
-          ChangePageOfTFT(page_index_last);
-        }
-
-        stepper.disable_all_steppers();
-
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  #if 0
-void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
-{
-  switch (key_value)
-  {
-    case 1:   // return
-
-      SERIAL_ECHOLNPGM("page_index_now: ", page_index_now);
-      SERIAL_ECHOLNPGM("page_index_last: ", page_index_last);
-      SERIAL_ECHOLNPGM("page_index_last_2: ", page_index_last_2);
-
-      if (isPrinting() || isPrintingPaused() || isPrintingFromMedia()) {
-        printer_state = AC_printer_stopping;
-        stopPrint();
-        ChangePageOfTFT(PAGE_MAIN);
-      } else {
-        ChangePageOfTFT(page_index_last);
-      }
-
-      onSurviveInKilled();
-
-      break;
-
-    default:
-      break;
-  }
-}
-  #endif
-
+  // Auto Leveling Fail due to Nozzle too high from the bed
   void DgusTFT::page199_to_200_handle(void) {
     switch (key_value) {
       case 1:  // return
@@ -2638,7 +2600,7 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
   }
 
   // Probe Pre Check
-  void DgusTFT::page201_handle(void) {
+  void DgusTFT::page204_handle(void) {
     static millis_t probe_check_time = 0;
     static uint8_t probe_check_counter = 0;
     static uint8_t probe_state_last = 0;
@@ -2694,7 +2656,6 @@ void DgusTFT::page178_to_181_190_to_193_handle(void)    // temperature abnormal
 
   void DgusTFT::page206_handle(void)  // probe precheck failed
   {
-
     switch (key_value) {
       case 0:
         break;
