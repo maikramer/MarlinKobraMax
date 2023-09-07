@@ -12,9 +12,12 @@ I've been working to bring the latest Marlin to the Kobra Max, the project is in
 ### What is not Working
 - Resume from pause not working
 - Filament Sensor (Sensor is Working, but it's not resuming, probably related to prior problem)
-- Power Loss Recovery
-- Some LCD Bugs Yet (Keypad not working, etc)
+- LCD Keypad not working
+- Some LCD Bugs
 - You Tell me
+
+### What was removed (For Simplicity)(Will not be in Release)
+- Power Loss Recovery (Removed Code, won't work if enabled in Configuration)
 
 # Warning
 Unfortunately I cannot give any promises or guarantees, I just have my one printer to try things on, so I cannot test for any other circumstances or variables. Which means that you are fully responsible for what happens when using this firmware.

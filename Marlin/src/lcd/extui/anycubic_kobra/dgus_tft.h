@@ -125,15 +125,15 @@
 // FILE TXT
 
 #define TXT_FILE_0 (0x2000 + 3 * 0x30)
-#define TXT_DISCRIBE_0 0x5000  // DISCRIBE ADDRESS
+#define TXT_DESCRIPT_0 0x5000  // DESCRIPT ADDRESS
 #define TXT_FILE_1 (0x2000 + 4 * 0x30)
-#define TXT_DISCRIBE_1 0x5030
+#define TXT_DESCRIPT_1 0x5030
 #define TXT_FILE_2 (0x2000 + 5 * 0x30)
-#define TXT_DISCRIBE_2 0x5060
+#define TXT_DESCRIPT_2 0x5060
 #define TXT_FILE_3 (0x2000 + 6 * 0x30)
-#define TXT_DISCRIBE_3 0x5090
+#define TXT_DESCRIPT_3 0x5090
 #define TXT_FILE_4 (0x2000 + 7 * 0x30)
-#define TXT_DISCRIBE_4 0x50C0
+#define TXT_DESCRIPT_4 0x50C0
 
 // PRINT TXT
 #define TXT_PRINT_NAME 0x2000 + 8 * 0x30
@@ -321,6 +321,9 @@
 
 #define COLOR_RED 0xf800
 #define COLOR_BLUE 0x0210
+#define COLOR_WHITE 0xffff
+
+#define DATA_BUF_SIZE 128
 
 namespace ExtUI {
   enum language_t : uint8_t { ENG };
@@ -342,42 +345,43 @@ namespace Anycubic {
     static lcd_info_t lcd_info_back;
     static uint32_t page_index_now;
 
-    void Startup();
+    static void Startup();
 
-    void IdleLoop();
+    static void IdleLoop();
 
-    void PrinterKilled(FSTR_P const error, FSTR_P const component);
+    static void PrinterKilled(FSTR_P const error, FSTR_P const component);
 
-    void MediaEvent(media_event_t);
+    static void SetDescriptColor(const uint16_t color,
+                                 const uint8_t index = lcd_txtbox_index);
 
-    void TimerEvent(timer_event_t);
+    static void MediaEvent(media_event_t);
 
-    void FilamentRunout();
+    static void TimerEvent(timer_event_t);
 
-    void ConfirmationRequest(const char *const);
+    static void FilamentRunout();
 
-    void StatusChange(const char *const);
+    static void ConfirmationRequest(const char *const);
 
-    void PowerLoss();
+    static void StatusChange(const char *const);
 
-    void PowerLossRecovery();
+    static void PowerLoss();
 
-    void HomingStart();
+    static void PowerLossRecovery();
 
-    void HomingComplete();
+    static void HomingStart();
 
-    void LevelingStart();
+    static void HomingComplete();
 
-    void LevelingDone();
+    static void LevelingStart();
 
-    void MeshUpdate(const int8_t xpos, const int8_t ypos,
-                    const ExtUI::probe_state_t state);
+    static void LevelingDone();
+
+    static void MeshUpdate(const int8_t xpos, const int8_t ypos,
+                           const ExtUI::probe_state_t state);
 
     typedef void (*p_fun)(void);
 
     static void page6_handle(void) {}
-
-    static void page115_handle(void);
 
     static void page121_handle(void);
 
@@ -450,7 +454,6 @@ namespace Anycubic {
     static void page153_handle(void);
 
     static void page170_handle(void);
-    static void page173_handle(void);
     static void page175_176_handle(void);
 
     static void page199_to_200_handle(void);
@@ -470,29 +473,27 @@ namespace Anycubic {
 
     static void printerStatsToTFT(void);  // MEL_MOD
 
-    void SendtoTFT(PGM_P);
+    static void SendtoTFT(PGM_P);
 
-    void SendtoTFTLN(PGM_P);
+    static void SendtoTFTLN(PGM_P);
 
-    bool ReadTFTCommand();
+    static bool ReadTFTCommand();
 
-    int8_t Findcmndpos(const uint8_t *, uint8_t);
+    static int8_t Findcmndpos(const uint8_t *, uint8_t);
 
-    void CheckHeaters();
+    static void CheckHeaters();
 
     static void SendFileList(int8_t);
 
-    void SelectFile();
+    static void SelectFile();
 
-    void InjectCommandandWait(PGM_P);
+    static void ProcessPanelRequest();
 
-    void ProcessPanelRequest();
+    static void PanelInfo(uint8_t);
 
-    void PanelInfo(uint8_t);
+    static void PanelAction(uint8_t);
 
-    void PanelAction(uint8_t);
-
-    void PanelProcess(uint8_t);
+    static void PanelProcess(uint8_t);
 
     static void SendValueToTFT(uint32_t value, uint32_t address);
 
@@ -522,7 +523,7 @@ namespace Anycubic {
     static float live_Zoffset;
     static file_menu_t file_menu;
     static bool data_received;
-    static uint8_t data_buf[64];
+    static uint8_t data_buf[DATA_BUF_SIZE];
     static uint8_t data_index;
     static uint32_t page_index_last;
     static uint32_t page_index_last_2;

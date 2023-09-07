@@ -33,7 +33,6 @@
 #if ENABLED(ANYCUBIC_LCD_KOBRA)
 
   #include "../../../MarlinCore.h"
-  #include "../../../feature/powerloss.h"
   #include "../../../feature/runout.h"
   #include "../../../gcode/queue.h"
   #include "../../../libs/numtostr.h"
@@ -120,7 +119,7 @@ namespace Anycubic {
   file_menu_t DgusTFT::file_menu;
 
   bool DgusTFT::data_received;
-  uint8_t DgusTFT::data_buf[64];
+  uint8_t DgusTFT::data_buf[DATA_BUF_SIZE];
   uint8_t DgusTFT::data_index;
   uint32_t DgusTFT::page_index_last;
   uint32_t DgusTFT::page_index_last_2;
@@ -216,9 +215,8 @@ namespace Anycubic {
     live_Zoffset = 0.0;
     file_menu = AC_menu_file;
 
-    // Filament runout is handled by Marlin settings in Configuration.h
-    // opt_set    FIL_RUNOUT_STATE HIGH  // Pin state indicating that filament
-    // is NOT present. opt_enable FIL_RUNOUT_PULLUP
+    TERN_(HAS_HOTEND, hotend_state = AC_heater_off);
+    TERN_(HAS_HEATED_BED, hotbed_state = AC_heater_off);
 
     TFTSer.begin(115200);
 
@@ -226,9 +224,6 @@ namespace Anycubic {
 
     injectCommands_P(AC_cmnd_enable_levelling);
 
-    // Startup tunes are defined in Tunes.h
-    // PlayTune(BEEPER_PIN, Anycubic_PowerOn, 1);
-    // PlayTune(BEEPER_PIN, GB_PowerOn, 1);
   #if ACDEBUGLEVEL
     SERIAL_ECHOLNPGM("AC Debug Level ", ACDEBUGLEVEL);
   #endif
@@ -265,17 +260,11 @@ namespace Anycubic {
       SendTxtToTFT(str_buf, TXT_MAIN_BED);
     }
     switch (page_index_now) {
-      case 115:
-        page115_handle();
-        break;
       case 157 ... 159:
       case 161 ... 169:
         break;
       case 170:
         page170_handle();
-        break;
-      case 173:
-        page173_handle();
         break;
       case 174:
         break;
@@ -397,6 +386,9 @@ namespace Anycubic {
       }
     }
   }
+  void DgusTFT::SetDescriptColor(const uint16_t color, const uint8_t index) {
+    SendColorToTFT(color, TXT_DESCRIPT_0 + 0x30 * (index - 1));
+  }
 
   void DgusTFT::MediaEvent(media_event_t event) {
   #if ACDEBUG(AC_MARLIN)
@@ -408,21 +400,19 @@ namespace Anycubic {
         filenavigator.reset();
         lcd_txtbox_page = 0;
         if (lcd_txtbox_index) {
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
         }
         SendFileList(lcd_txtbox_index);
         break;
 
       case AC_media_removed:
-        //        SendtoTFTLN(AC_msg_sd_card_removed);
+        // SendtoTFTLN(AC_msg_sd_card_removed);
 
         filenavigator.reset();
         lcd_txtbox_page = 0;
         if (lcd_txtbox_index) {
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
         }
 
@@ -481,11 +471,13 @@ namespace Anycubic {
 
     pop_up_index = POPUP_FILAMENT_LACK;  // show filament lack.
 
-    if (READ(FIL_RUNOUT_PIN)) {
+    if (getFilamentRunoutState()) {
       PlayTune(BEEPER_PIN, FilamentOut, 1);
 
       if (isPrintingFromMedia()) {
         pausePrint();
+        setTargetTemp_celsius(0, E0);
+        setTargetTemp_celsius(0, BED);
         printer_state = AC_printer_pausing;
         pause_state = AC_paused_filament_lack;
       }
@@ -583,12 +575,6 @@ namespace Anycubic {
         } else if (strcmp_P(msg, MARLIN_msg_media_removed) == 0) {
           msg_matched = true;
           printer_state = AC_printer_stopping_from_media_remove;
-        } else {
-  #if ACDEBUG(AC_MARLIN)
-          SERIAL_ECHOLNPGM("setFilamentRunoutState: ", __LINE__);
-  #endif
-
-          setFilamentRunoutState(false);
         }
       } break;
 
@@ -596,6 +582,10 @@ namespace Anycubic {
         if (strcmp_P(msg, MARLIN_msg_print_paused) == 0) {
           if (pause_state != AC_paused_filament_lack) {
             ChangePageOfTFT(PAGE_STATUS1);  // show resume
+            if (lcd_txtbox_index) {
+              SetDescriptColor(COLOR_WHITE);
+              lcd_txtbox_index = 0;
+            }
             pause_state = AC_paused_idle;
           }
 
@@ -650,12 +640,6 @@ namespace Anycubic {
     for (uint8_t i = 0; i < 8; i++) {
       TFTSer.write(data_buf[i]);
     }
-  }
-
-  void DgusTFT::PowerLossRecovery() {
-    printer_state =
-        AC_printer_resuming_from_power_outage;  // Play tune to notify
-                                                // user we can recover.
   }
 
   void DgusTFT::HomingStart() {
@@ -893,11 +877,11 @@ namespace Anycubic {
     data = TFTSer.read();
 
     if (tft_receive_steps == 0) {
-      if (data != 0x5a) {
+      if (data != 0x5A) {
         cnt = 0;
         length = 0;
         data_index = 0;
-        data_received = 0;
+        data_received = false;
         return false;
       }
 
@@ -923,7 +907,7 @@ namespace Anycubic {
       data_index = 0;
       cnt = 0;
     } else if (tft_receive_steps == 3) {
-      if (data_index >= 63) {
+      if (data_index >= DATA_BUF_SIZE - 1) {
   #if ACDEBUG(AC_MARLIN)
         SERIAL_ECHOLNPGM("lcd uart buff overflow: ", data_index);
   #endif
@@ -1040,11 +1024,6 @@ namespace Anycubic {
     }
   }
 
-  void DgusTFT::InjectCommandandWait(PGM_P cmd) {
-    // injectCommands_P(cmnd); queue.enqueue_now_P(cmd);
-    // SERIAL_ECHOLN(PSTR("Inject>"));
-  }
-
   void DgusTFT::ProcessPanelRequest() {
     uint8_t *p_u8;
     unsigned int control_index = 0;
@@ -1053,7 +1032,7 @@ namespace Anycubic {
     char str_buf[20];
 
     if (data_received) {
-      data_received = 0;
+      data_received = false;
 
       if (0x83 == data_buf[0]) {
         p_u8 = (uint8_t *)(&control_index);  // get control address
@@ -1148,18 +1127,7 @@ namespace Anycubic {
             SendValueToTFT(getCaseLightState(),
                            ADDRESS_PRINT_SETTING_LED_STATUS);
   #endif
-
-            if (AC_printer_resuming_from_power_outage == printer_state) {
-              char filename[64] = {'\0'};
-              ChangePageOfTFT(PAGE_OUTAGE_RECOVERY);
-              card.getLongPath(filename, recovery.info.sd_filename);
-              SendTxtToTFT(filename, TXT_OUTAGE_RECOVERY_FILE);
-              //                        SendTxtToTFT(ui8tostr3rj(recovery.info.print_progress),
-              //                                     TXT_OUTAGE_RECOVERY_PROGRESS);
-              PlayTune(BEEPER_PIN, SOS, 1);
-            } else {
-              ChangePageOfTFT(PAGE_MAIN);
-            }
+            ChangePageOfTFT(PAGE_MAIN);
 
           } else if ((control_value & 0x00FFFFFF) ==
                      0x010000) {                        // startup first gif
@@ -1190,45 +1158,6 @@ namespace Anycubic {
 }
   #endif
 
-  // Unknown Yet page
-  void DgusTFT::page115_handle(void) {
-    static millis_t flash_time = 0;
-    switch (key_value) {
-      case 0:
-        break;
-      case 1: {
-        ChangePageOfTFT(PAGE_LEVELING_SETTINGS);
-      } break;
-
-      case 2: {
-        injectCommands_P(PSTR("M1024 S3"));  // -1
-      } break;
-
-      case 3: {
-        injectCommands_P(PSTR("M1024 S4"));  // 1
-      }
-
-      break;
-
-      case 4: {
-        injectCommands_P(PSTR("M1024 S1"));  // -0.1
-      } break;
-      case 5: {
-        injectCommands_P(PSTR("M1024 S2"));  // 0.1
-      } break;
-
-      case 6: {
-        injectCommands_P(PSTR("M1024 S0"));  // prepare, move x y to center
-      } break;
-      case 7: {
-        injectCommands_P(PSTR("M1024 S5"));  // 0.1
-      } break;
-    }
-
-    if (millis() < (flash_time + 1000)) return;
-    flash_time = millis();
-  }
-
   // MainPage
   void DgusTFT::page121_handle(void) {
     static millis_t flash_time = 0;
@@ -1242,8 +1171,7 @@ namespace Anycubic {
         lcd_txtbox_page = 0;
 
         if (lcd_txtbox_index) {
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
         }
         ChangePageOfTFT(PAGE_FILE);
@@ -1293,20 +1221,17 @@ namespace Anycubic {
       case 0:
         break;
 
-      case 1:  // return
-      {
+      case 1:
         ChangePageOfTFT(PAGE_MAIN);
-        SendColorToTFT(COLOR_BLUE,
-                       TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
-      } break;
+        SetDescriptColor(COLOR_WHITE);
+        break;
 
       case 2:  // page up
       {
         if (lcd_txtbox_page > 0) {
           lcd_txtbox_page--;
 
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
 
           SendFileList(lcd_txtbox_page * 5);
@@ -1319,8 +1244,7 @@ namespace Anycubic {
         if ((lcd_txtbox_page + 1) * 5 < filenavigator.getFileNum()) {
           lcd_txtbox_page++;
 
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
 
           SendFileList(lcd_txtbox_page * 5);
@@ -1338,8 +1262,7 @@ namespace Anycubic {
 
         lcd_txtbox_page = 0;
         if (lcd_txtbox_index) {
-          SendColorToTFT(COLOR_BLUE,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
+          SetDescriptColor(COLOR_WHITE);
           lcd_txtbox_index = 0;
         }
 
@@ -1348,18 +1271,14 @@ namespace Anycubic {
 
       case 5:  // Power Outage Recovery
         break;
-
       case 6:                                                // Start Print
         if (lcd_txtbox_index > 0 && lcd_txtbox_index < 6) {  // 1~5
 
           if (filenavigator.filelist.seek(lcd_txtbox_page * 5 +
                                           (lcd_txtbox_index - 1))) {
-            SendColorToTFT(COLOR_BLUE,
-                           TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
-
+            SetDescriptColor(COLOR_WHITE);
             // Allows printer to restart the job if we dont want to recover
             if (printer_state == AC_printer_resuming_from_power_outage) {
-              injectCommands_P(PSTR("M1000 C"));  // Cancel recovery
               printer_state = AC_printer_idle;
             }
 
@@ -1418,13 +1337,10 @@ namespace Anycubic {
         // lcd_txtbox_index 1~5
         file_index = lcd_txtbox_page * 5 + (lcd_txtbox_index - 1);
         if (file_index < filenavigator.getFileNum()) {
-          SendColorToTFT(COLOR_RED,
-                         TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index - 1));
-
+          SetDescriptColor(COLOR_RED);
           if (lcd_txtbox_index_last &&
               lcd_txtbox_index_last != lcd_txtbox_index) {  // 1~5
-            SendColorToTFT(COLOR_BLUE,
-                           TXT_DISCRIBE_0 + 0x30 * (lcd_txtbox_index_last - 1));
+            SetDescriptColor(COLOR_WHITE);
           }
           lcd_txtbox_index_last = lcd_txtbox_index;
         }
@@ -1440,6 +1356,9 @@ namespace Anycubic {
   }
 
   void DgusTFT::Page123_124_Stop() {
+  #if ACDEBUG(AC_MARLIN)
+    SERIAL_ECHOLN("Stopping Print");
+  #endif
     if (isPrintingFromMedia()) {
       ChangePageOfTFT(PAGE_STOP_CONF);
     }
@@ -1503,20 +1422,19 @@ namespace Anycubic {
 
       case 2:  // Resume Print
   #if ACDEBUG(AC_MARLIN)
+        SERIAL_ECHOLN("Resuming Print");
         SERIAL_ECHOLNPGM("printer_state: ", printer_state);
         SERIAL_ECHOLNPGM("pause_state: ", pause_state);
   #endif
         if (pause_state == AC_paused_idle ||
             pause_state == AC_paused_filament_lack) {
-          if (!getFilamentRunoutState()) {
-            printer_state = AC_printer_printing;
-            pause_state = AC_paused_idle;
-            resumePrint();
-            ChangePageOfTFT(
-                PAGE_STATUS2);  // show pause print (normal print page)
-          } else {
-            pop_up_index = POPUP_FILAMENT_LACK;
-          }
+          printer_state = AC_printer_printing;
+          pause_state = AC_paused_idle;
+          resumePrint();
+  #if ACDEBUG(AC_MARLIN)
+          SERIAL_ECHOLN("Resuming Print 2");
+  #endif
+          ChangePageOfTFT(PAGE_STATUS2);
           flash_time = millis();
 
         } else {
@@ -1525,6 +1443,7 @@ namespace Anycubic {
         break;
 
       case 3:  // Stop Print
+
         Page123_124_Stop();
         break;
 
@@ -1553,6 +1472,8 @@ namespace Anycubic {
       case 2:  // print pause
         if (isPrintingFromMedia()) {
           pausePrint();
+          setTargetTemp_celsius(0, E0);
+          setTargetTemp_celsius(0, BED);
           printer_state = AC_printer_pausing;
           pause_state = AC_paused_idle;
           ChangePageOfTFT(PAGE_WAIT_PAUSE);
@@ -2149,6 +2070,7 @@ namespace Anycubic {
       case 1:  // Back Button
       {
         filament_cmd = FILA_NO_ACT;
+        injectCommands(F("G90"));
         ChangePageOfTFT(PAGE_PREPARE);
       } break;
 
@@ -2161,6 +2083,7 @@ namespace Anycubic {
             setTargetTemp_celsius(230, E0);
           }
           filament_cmd = FILA_IN;
+          injectCommands(F("G91"));
         }
         break;
 
@@ -2176,6 +2099,7 @@ namespace Anycubic {
             injectCommands_P(AC_cmnd_manual_unload_filament_first_in);
           }
           filament_cmd = FILA_OUT;
+          injectCommands(F("G91"));
         }
         break;
 
@@ -2209,6 +2133,15 @@ namespace Anycubic {
 
   // Operation Performed PopUp
   void DgusTFT::page140_handle(void) {
+  #if ACDEBUG(AC_ALL)
+    if ((page_index_saved != page_index_now)) {
+      DEBUG_ECHOLNPGM("page20  page_index_last_2: ", page_index_last_2,
+                      "  page_index_last: ", page_index_last,
+                      "  page_index_now: ", page_index_now,
+                      "  key: ", key_value);
+      page_index_saved = page_index_now;
+    }
+  #endif
     switch (key_value) {
       case 0:
         break;
@@ -2337,8 +2270,6 @@ namespace Anycubic {
           message_index = 6;
           ChangePageOfTFT(PAGE_MAIN);
         } else {
-          if (printer_state == AC_printer_resuming_from_power_outage)
-            injectCommands_P(PSTR("M1000 C"));  // Cancel recovery
           printer_state = AC_printer_idle;
         }
 
@@ -2520,52 +2451,6 @@ namespace Anycubic {
     }
   }
 
-  // Power Outage Handler
-  void DgusTFT::page173_handle(void) {
-    char str_buf[20] = {'\0'};
-
-    switch (key_value) {
-      case 0:
-        break;
-
-      case 1:  // resume
-      {
-        char filename[64] = {'\0'};
-        ChangePageOfTFT(PAGE_OUTAGE_RECOVERY);
-        card.getLongPath(filename, recovery.info.sd_filename);
-        filename[17] = '\0';
-        SendTxtToTFT(filename, TXT_OUTAGE_RECOVERY_FILE);
-
-        sprintf(str_buf, "%u", (uint16_t)getFeedrate_percent());
-        SendTxtToTFT(str_buf, TXT_PRINT_SPEED);
-
-        sprintf(str_buf, "%u", (uint16_t)getProgress_percent());
-        SendTxtToTFT(str_buf, TXT_PRINT_PROGRESS);
-
-        ChangePageOfTFT(PAGE_STATUS2);  // show pause
-
-  #ifdef CASE_LIGHT_ENABLE
-        injectCommands_P(
-            PSTR("M355 S1\nM1000"));  // case light on, home and start recovery
-  #else
-        injectCommands_P(PSTR("M1000"));
-  #endif
-      } break;
-
-      case 2:  // cancel
-      {
-        printer_state = AC_printer_idle;
-        ChangePageOfTFT(PAGE_MAIN);
-
-  #ifdef CASE_LIGHT_ENABLE
-        injectCommands_P(PSTR("M355 S0\nM1000 C"));  // cancel recovery
-  #else
-        injectCommands_P(PSTR("M1000 C"));
-  #endif
-      } break;
-    }
-  }
-
   // Probe Preheating
   void DgusTFT::page175_176_handle(void) {
     static millis_t flash_time = 0;
@@ -2663,6 +2548,10 @@ namespace Anycubic {
       case 1:  // return
       {
         ChangePageOfTFT(PAGE_LEVELING_SETTINGS);
+  #if ENABLED(PREHEAT_BEFORE_LEVELING)
+        setTargetTemp_celsius(0, E0);
+        setTargetTemp_celsius(0, BED);
+  #endif
       } break;
     }
   }
