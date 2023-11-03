@@ -667,7 +667,6 @@ namespace Anycubic {
   void DgusTFT::LevelingStart() { is_auto_leveling = true; }
 
   void DgusTFT::LevelingDone() {
-    setZOffset_mm(0.05);
     injectCommands_P(PSTR("M500"));
     printer_state = AC_printer_idle;
     is_auto_leveling = false;
@@ -2536,7 +2535,7 @@ namespace Anycubic {
   // Probe Check Ok
   void DgusTFT::page205_handle(void) {
     ChangePageOfTFT(PAGE_LEVELING);
-    injectCommands_P(PSTR("M851 Z0\nG28\nG29"));
+    injectCommands_P(PSTR("G28\nG29"));
   }
 
   void DgusTFT::page206_handle(void)  // probe precheck failed
